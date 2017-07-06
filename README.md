@@ -35,8 +35,8 @@ systemctl enable httpd
 
 setenforce 0     # unfortunately I have not figured out how to make this selinux friendly .. it's on the list to make it work
                  # you might want to disable selinux permanently for now
-firewall-cmd --permanent --add-service http<br>
-firewall-cmd  --reload<br>
+firewall-cmd --permanent --add-service http
+firewall-cmd  --reload
 ```
 <h1> HextupleO installation </h1>
 <pre>
@@ -146,3 +146,4 @@ gpgcheck=0
 
 
 </pre>
+This should be it. You can now go to http://<your_hextupleO_ip>/hextupleO and start deploying new epemeral OSPs
