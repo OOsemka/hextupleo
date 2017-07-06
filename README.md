@@ -13,29 +13,27 @@ https://github.com/jonjozwiak/openstack/tree/master/director-examples/nested-vir
 After the basic VM with RHEL7 is installed here are the steps that need to be done to complete the configuration:<br>
 <br>
 ```
-yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm   #or whatever the latest link to epel is<br>
-yum install python-pip python-wheel ansible gcc python-devel<br>
-yum install python-neutronclient      # for whatever reason the neutron commands hasn't installed with shade <br>
-pip install shade              <br>
-<br>
-yum install httpd php<br>
-systemctl start httpd<br>
-systemctl enable httpd<br>
-<br>
-setenforce 0     # unfortunately I have not figured out how to make this selinux friendly .. it's on the list to make it work<br>
-                 # you might want to disable selinux permanently for now<br>
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm   #or whatever the latest link to epel is
+yum install python-pip python-wheel ansible gcc python-devel
+yum install python-neutronclient      # for whatever reason the neutron commands hasn't installed with shade 
+pip install shade              
+
+yum install httpd php
+systemctl start httpd
+systemctl enable httpd
+
+setenforce 0     # unfortunately I have not figured out how to make this selinux friendly .. it's on the list to make it work
+                 # you might want to disable selinux permanently for now
 firewall-cmd --permanent --add-service http<br>
 firewall-cmd  --reload<br>
-<br>
-<br>
 ```
 <h1> HextupleO installation </h1>
 <pre>
- <br>
-chmod 777 /usr/share/httpd  <br>
-cd /var/www/html/hextupleo<br>
+ 
+chmod 777 /usr/share/httpd  
+cd /var/www/html/hextupleo
 git clone https://github.com/OOsemka/hextupleo.git<br>
-<br>
-sudo -u apache ssh-keygen -t rsa<br>
-cp /usr/share/httpd/.ssh/id_rsa.pub nested-openstack/files/<br>
+
+sudo -u apache ssh-keygen -t rsa
+cp /usr/share/httpd/.ssh/id_rsa.pub nested-openstack/files/
 </pre>
