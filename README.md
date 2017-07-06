@@ -14,7 +14,15 @@ https://github.com/jonjozwiak/openstack/tree/master/director-examples/nested-vir
 <br>
 After the basic VM with RHEL7 is installed here are the steps that need to be done to complete the configuration:<br>
 <br>
+You need to import a special pxe boot image to your master openstack`in order to pxeboot overcloud nodes.
+Here is how I have done it
+wget https://github.com/OOsemka/hextupleo/raw/master/pxeboot.img
+source overcloudrc  (of the master OpenStack)
+openstack image create --disk-format raw --file pxeboot.img --public --container-format bare  pxeboot
+
 ```
+
+
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm   #or whatever the latest link to epel is
 yum install python-pip python-wheel ansible gcc python-devel
 yum install python-neutronclient      # for whatever reason the neutron commands hasn't installed with shade 
