@@ -22,7 +22,7 @@ wget https://github.com/OOsemka/hextupleo/raw/master/pxeboot.img
 source overcloudrc  (of the master OpenStack)
 openstack image create --disk-format raw --file pxeboot.img --public --container-format bare  pxeboot
 ```
-
+Then go back to your HextupleO VM/node and execute:
 ```
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm   #or whatever the latest link to epel is
 yum install python-pip python-wheel ansible gcc python-devel
