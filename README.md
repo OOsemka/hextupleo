@@ -30,7 +30,7 @@ firewall-cmd  --reload<br>
 <br>
 ```
 <h1> HextupleO installation </h1>
-
+<pre>
  <br>
 chmod 777 /usr/share/httpd  <br>
 cd /var/www/html/hextupleo<br>
@@ -38,3 +38,4 @@ git clone https://github.com/OOsemka/hextupleo.git<br>
 <br>
 sudo -u apache ssh-keygen -t rsa<br>
 cp /usr/share/httpd/.ssh/id_rsa.pub nested-openstack/files/<br>
+</pre>
