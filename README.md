@@ -12,6 +12,7 @@ https://github.com/jonjozwiak/openstack/tree/master/director-examples/nested-vir
 <br>
 After the basic VM with RHEL7 is installed here are the steps that need to be done to complete the configuration:<br>
 <br>
+```
 yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm   #or whatever the latest link to epel is<br>
 yum install python-pip python-wheel ansible gcc python-devel<br>
 yum install python-neutronclient      # for whatever reason the neutron commands hasn't installed with shade <br>
@@ -27,11 +28,13 @@ firewall-cmd --permanent --add-service http<br>
 firewall-cmd  --reload<br>
 <br>
 <br>
+```
 <h1> HextupleO installation </h1>
+```
 chmod 777 /usr/share/httpd  <br>
 cd /var/www/html/hextupleo<br>
 git clone https://github.com/OOsemka/hextupleo.git<br>
 <br>
 sudo -u apache ssh-keygen -t rsa<br>
 cp /usr/share/httpd/.ssh/id_rsa.pub nested-openstack/files/<br>
-
+```
