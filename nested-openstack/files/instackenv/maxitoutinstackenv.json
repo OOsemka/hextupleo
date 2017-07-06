@@ -1,0 +1,149 @@
+{
+    "nodes":[
+        {    
+            "mac":[
+                "fa:16:3e:20:15:39"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"controller1",
+            "capabilities": "profile:control",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/controller1"
+
+        },
+        {    
+            "mac":[
+                "fa:16:3e:f7:3c:00"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"controller2",
+            "capabilities": "profile:control",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/controller2"
+
+        },
+        {    
+            "mac":[
+                "fa:16:3e:e5:3a:96"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"controller3",
+            "capabilities": "profile:control",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/controller3"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:29:48:53"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"compute1",
+            "capabilities": "profile:compute",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/compute1"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:f5:1b:5c"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"compute2",
+            "capabilities": "profile:compute",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/compute2"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:36:5e:8c"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"compute3",
+            "capabilities": "profile:compute",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/compute3"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:51:fb:b1"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"ceph1",
+            "capabilities": "profile:ceph-storage",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/ceph1"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:9c:9e:ce"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"ceph2",
+            "capabilities": "profile:ceph-storage",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/ceph2"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:17:17:07"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"ceph3",
+            "capabilities": "profile:ceph-storage",
+            "pm_user":"maxitout",
+            "pm_password":"Passw0rd",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/ceph3"
+
+
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+    "nodes":[
+        {    
+            "mac":[
+                "fa:16:3e:b0:d6:9e"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"controller1",
+            "capabilities": "profile:control",
+            "pm_user":"osp10",
+            "pm_password":"osp10",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/controller1"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:41:11:89"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"compute1",
+            "capabilities": "profile:compute",
+            "pm_user":"osp10",
+            "pm_password":"osp10",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/compute1"
+
+        },
+        {
+            "mac":[
+                "fa:16:3e:35:2d:69"
+            ],
+            "cpu":"2",
+            "memory":"4096",
+            "disk":"40",
+            "arch":"x86_64",
+            "pm_type":"pxe_ipmitool",
+            "name":"ceph1",
+            "capabilities": "profile:ceph-storage",
+            "pm_user":"osp10",
+            "pm_password":"osp10",
+            "pm_addr":"https://10.9.65.100:13000/v2.0/ceph1"
+
+
+        }
+    ]
+}

@@ -1,0 +1,460 @@
+- name: cleanup openstack projects
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - vars/openstack_vars.yaml
+
+  tasks:
+
+
+
+# Delete Instances
+#######################################3
+
+  - name: delete instance undercloud
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: undercloud
+       validate_certs: False
+    async: 7200
+    poll: 0
+
+  - name: delete instance ceph
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: ceph{{ item }}
+       validate_certs: False
+    with_sequence:
+       count="{{ ceph_count }}"
+    async: 7200
+    poll: 0
+    register: ceph_instances
+
+
+
+  - name: delete instance controller
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: controller{{ item }}
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+    async: 7200
+    poll: 0
+    register: controller_instances
+
+
+
+  - name: delete instance compute
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: compute{{ item }}
+       validate_certs: False
+    with_sequence:
+       count="{{ compute_count }}"
+    async: 7200
+    poll: 0
+    register: compute_instances
+
+
+
+
+# Delete volumes
+#####################
+
+  - name: Wait for ceph-instance deletion to complete
+    async_status: jid={{ item.ansible_job_id }}
+    register: ceph_jobs
+    until: ceph_jobs.finished
+    retries: 300
+    with_items: "{{ ceph_instances.results }}"
+
+
+
+  - name: delete volumes for ceph
+    os_volume:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       size: "{{ ceph_disk_size }}"
+       display_name: ceph-volume{{ item }}
+       validate_certs: False
+    with_sequence:
+       count="{{ ceph_count }}"
+
+
+  - name: Wait for controller-instance deletion to complete
+    async_status: jid={{ item.ansible_job_id }}
+    register: controller_jobs
+    until: controller_jobs.finished
+    retries: 300
+    with_items: "{{ controller_instances.results }}"
+
+  - name: Wait for compute-instance deletion to complete
+    async_status: jid={{ item.ansible_job_id }}
+    register: compute_jobs
+    until: compute_jobs.finished
+    retries: 300
+    with_items: "{{ compute_instances.results }}"
+
+
+
+
+# Delete Ports
+###########################################
+# undercloud
+############
+
+  - name: delete pxe port for undercloud
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: pxe-undercloud
+       network: "{{ network_pxe }}"
+       no_security_groups: True
+       validate_certs: False
+
+  - name: delete pxe port for controllers
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: pxe-controller{{ item }}
+       network: "{{ network_pxe }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+
+
+  - name: delete internalapi port for controllers
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: intapi-controller{{ item }}
+       network: "{{ network_intapi }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+
+
+  - name: delete tenant port for controllers
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: tenant-controller{{ item }}
+       network: "{{ network_tenant }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+
+
+  - name: delete storage port for controllers
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storage-controller{{ item }}
+       network: "{{ network_storage }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+
+
+  - name: delete storagemgmt port for controllers
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storagemgmt-controller{{ item }}
+       network: "{{ network_storagemgmt }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+
+  - name: delete external port for controllers
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: "{{ project_name }}-external-controller{{ item }}"
+       network: "{{ network_external }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ controller_count }}"
+
+
+
+  - name: delete pxe port for compute
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: pxe-compute{{ item }}
+       network: "{{ network_pxe }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ compute_count }}"
+
+
+  - name: delete internal api port for compute
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: intapi-compute{{ item }}
+       network: "{{ network_intapi }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ compute_count }}"
+
+  - name: delete tenant port for compute
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: tenant-compute{{ item }}
+       network: "{{ network_tenant }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ compute_count }}"
+
+
+  - name: delete storage port for compute
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storage-compute{{ item }}
+       network: "{{ network_storage }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ compute_count }}"
+
+
+
+  - name: delete pxe port for ceph
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: pxe-ceph{{ item }}
+       network: "{{ network_pxe }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ ceph_count }}"
+
+  - name: delete storage port for ceph
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storage-ceph{{ item }}
+       network: "{{ network_storage }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ ceph_count }}"
+
+
+  - name: delete storagemgmt port for ceph
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storagemgmt-ceph{{ item }}
+       network: "{{ network_storagemgmt }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ ceph_count }}"
+
+
+
+
+# Delete keypair
+#####################################
+
+  - name: delete keypair for ansible server
+    os_keypair:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: "{{ keypair }}"
+       validate_certs: False
+
+
+
+  -  name: delete networks pxe
+     os_network:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+
+       state: absent
+       name: pxe
+       validate_certs: False
+
+  -  name: delete networks internalapi
+     os_network:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+
+       state: absent
+       name: internalapi
+       validate_certs: False
+
+  -  name: delete networks tenant
+     os_network:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+
+       state: absent
+       name: tenant
+       validate_certs: False
+
+  -  name: delete networks storage
+     os_network:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+
+       state: absent
+       name: storage
+       validate_certs: False
+
+  -  name: delete networks storagemgmt
+     os_network:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+
+       state: absent
+       name: storagemgmt
+       validate_certs: False
+
+
+
+
+  -  name: delete users
+     os_user:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ cloud_admin }}"
+         password: "{{ admin_password }}"
+         project_name: "{{ admin_project }}"
+       state: absent
+       name: "{{ project_name }}"
+       password: "{{ project_password }}"
+       domain: "{{ project_name }}"
+       endpoint_type: admin
+       default_project: "{{ project_name }}"
+       validate_certs: False
+
+
+  -  name: delete projects  
+     os_project:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ cloud_admin }}"
+         password: "{{ admin_password }}"
+         project_name: "{{ admin_project }}"
+       state: absent
+       enabled: True
+       endpoint_type: admin
+       name: "{{ project_name }}"
+       validate_certs: False
+
