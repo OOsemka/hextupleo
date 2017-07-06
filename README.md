@@ -1,6 +1,6 @@
-# hextupleo
+# HextupleO
 This project has been created to deploy VM infrastructure on top of OpenStack that later can be consumed by new ephemeral TripleO OpenStack deployments.
-It is all being developed with TripleO .. so both master OpenStack deployment as well as children OpenStack deployments are or done based on TrieplO project .. hence the name hextupleO
+It is all being developed with TripleO .. so both master OpenStack deployment as well as children OpenStack deployments are  done based on TripleO project .. hence the name hextupleO
 This tool uses combination of ansible with shade libraries as well as some php and apache server for dashboard
 
 Project is still under development. It's fully functional, but might still have bugs that I don't take resposibility of.
