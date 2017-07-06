@@ -32,6 +32,7 @@ firewall-cmd  --reload<br>
 <h1> HextupleO installation </h1>
  <br>
 ```
+ <br>
 chmod 777 /usr/share/httpd  <br>
 cd /var/www/html/hextupleo<br>
 git clone https://github.com/OOsemka/hextupleo.git<br>
