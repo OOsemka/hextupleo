@@ -30,6 +30,7 @@ firewall-cmd  --reload<br>
 <br>
 ```
 <h1> HextupleO installation </h1>
+ <br>
 ```
 chmod 777 /usr/share/httpd  <br>
 cd /var/www/html/hextupleo<br>
