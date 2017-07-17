@@ -65,6 +65,7 @@ vi nested-openstack/vars/openstack_vars.yaml
     flavor_controller: overcloud-controller    <-- this is flavor that is going to be used for controllers and needs to be pre-created
     flavor_compute: overcloud-compute    <-- this is flavor that is going to be used for compute and needs to be pre-created
     flavor_ceph: overcloud-ceph        <-- this is flavor that is going to be used for ceph and needs to be pre-created
+    flavor_hci: overcloud-hci        <-- this is flavor that is going to be used for hci and needs to be pre-created
     ceph_disk_count: 1         <-- don't need to change that 
     ceph_disk_size: 100        <-- ceph disk size
     cloud_admin: admin         <-- master openstack admin user 
