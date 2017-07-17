@@ -5,6 +5,7 @@
     flavor_controller: overcloud-controller
     flavor_compute: overcloud-compute
     flavor_ceph: overcloud-ceph
+    flavor_hci: overcloud-hci
     ceph_disk_count: 1
     ceph_disk_size: 100
     cloud_admin: admin
