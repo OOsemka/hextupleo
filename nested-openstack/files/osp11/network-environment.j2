@@ -4,6 +4,9 @@ resource_registry:
   # Network Interface templates to use (these files must exist)
   OS::TripleO::Compute::Net::SoftwareConfig:
     ./nic-config/compute.yaml
+  # if you are configuring HCI (Hyperconverged nodes) comment 2 lines above and uncomment 2 lines below
+  #OS::TripleO::Compute::Net::SoftwareConfig:
+  #  ./nic-config/compute-hci.yaml
   OS::TripleO::Controller::Net::SoftwareConfig:
     ./nic-config/controller.yaml
   OS::TripleO::CephStorage::Net::SoftwareConfig:

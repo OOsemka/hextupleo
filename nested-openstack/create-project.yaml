@@ -933,8 +933,8 @@
                     "disk":"40",
                     "arch":"x86_64",
                     "pm_type":"pxe_ipmitool",
-                    "name":"ceph{{ item.item }}",
-                    "capabilities": "profile:hci",
+                    "name":"hci{{ item.item }}",
+                    "capabilities": "profile:compute",
                     "pm_user":"{{ project_name }}",
                     "pm_password":"{{ project_password }}",
                     "pm_addr":"{{ os_auth }}/hci{{ item.item }}"
@@ -1444,6 +1444,7 @@
       - storage-environment.yaml
       - wipe-disk.sh
       - wipe-disks.yaml
+      - hci-compute.yaml
 
 
 
@@ -1452,6 +1453,7 @@
     with_items:
       - controller.yaml
       - compute.yaml
+      - compute-hci.yaml
       - ceph-storage.yaml
 
  

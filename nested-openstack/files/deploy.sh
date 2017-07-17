@@ -16,4 +16,7 @@ time openstack overcloud deploy --templates --stack hextupleO \
      #if ceph has been configured you might consider adding following pre-defined extension (again verify it's what you want):
      #-e templates/storage-environment.yaml \
 
+     # for hyperconverged (hci) nodes you could use this file
+     #-e /usr/share/openstack-tripleo-heat-templates/environments/hyperconverged-ceph.yaml
+     #-e templates/hci-compute.yaml 
 
