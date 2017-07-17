@@ -2,6 +2,12 @@
 <html>
 <head>
 <title>HextupleO - create project </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 <link rel="shortcut icon" type="image/png" href="favicon.png"/>
 
 <style>
@@ -54,10 +60,38 @@ tr:nth-child(even) {
    <th><input type="radio" name="osp" value="osp11" checked> osp11 <input type="radio" name="osp" value="osp10"> osp10 </th>
 </tr>
 <tr>
+   <th>   <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#advanced">Advanced</button> </th>
+   <th> Collapse for more features </th>
+</tr>
+<tr>
    <th> <input type="submit" name="submit" value="Build Environment!"> </th>
 </tr>
+
+
 </table>
+
+<div id="advanced" class="panel-collapse collapse">
+<table>
+<tr>
+<th>
+<b>Advanced Features </b>
+</th>
+</tr>
+
+<tr>
+<th>
+HCI Count (max 3):
+</th>
+
+<th>
+<input type="number" name="hci" min="0" max="3" value="0">
+</th>
+</tr>
+</table>
+</div>
 </form>
+
+
 </body>
 </html>
 <?php
@@ -134,14 +168,14 @@ if((($_POST['user']) != '') && (($_POST['password']) != '')) {
 
 
 
-    $data = '   project_name: ' . $_POST['user'] . "\n" . '   project_password: ' . $_POST['password'] . "\n" . '   controller_count: ' . $_POST['controller'] . "\n" . '   compute_count: ' . $_POST['compute'] . "\n" . '   ceph_count: ' . $_POST['ceph'] . "\n" . '   osp: ' . $_POST['osp'] . "\n" . '   id: ' . "$id \n" . '   network_external: ' . "$network \n" . '   cidr: ' . "$cidr \n" . '   gateway: ' . "$gateway \n" . '   firstip: ' . "$firstip \n" . '   lastip: ' . "$lastip \n";
+    $data = '   project_name: ' . $_POST['user'] . "\n" . '   project_password: ' . $_POST['password'] . "\n" . '   controller_count: ' . $_POST['controller'] . "\n" . '   compute_count: ' . $_POST['compute'] . "\n" . '   ceph_count: ' . $_POST['ceph'] . "\n" . '   hci_count: ' . $_POST['hci'] . "\n" . '   osp: ' . $_POST['osp'] . "\n" . '   id: ' . "$id \n" . '   network_external: ' . "$network \n" . '   cidr: ' . "$cidr \n" . '   gateway: ' . "$gateway \n" . '   firstip: ' . "$firstip \n" . '   lastip: ' . "$lastip \n";
 
     $ret = file_put_contents('/var/www/html/hextupleo/vars/' . $_POST['user'] . '.yaml', $data, LOCK_EX);
     if($ret === false) {
         die('There was an error writing this file');
                        }
     else {
-        #echo "<b>Log on to Horizon with just created user and password: <a href=https://10.9.65.100/dashboard/auth/login/?next=/dashboard/ target=_blank> https://10.9.65.100/dashboard</a></b> <br><hr>";
+        echo "<b>Log on to Horizon with just created user and password: <a href=https://10.9.65.100/dashboard/auth/login/?next=/dashboard/ target=_blank> https://10.9.65.100/dashboard</a></b> <br><hr>";
         echo "<b>!!! This is still work in progress. Don't close this webpage until ansible playbook is done!!!</b> <br><hr>";
         $result = liveExecuteCommand('ansible-playbook nested-openstack/create-project.yaml  -e @vars/' . $_POST['user'] . '.yaml | tee logs/' . $_POST['user'] . '.log');
         #$result = liveExecuteCommand('ping -c 5 127.0.0.1');

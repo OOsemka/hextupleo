@@ -41,6 +41,22 @@
     register: ceph_instances
 
 
+  - name: delete instance hci
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: hci{{ item }}
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
+    async: 7200
+    poll: 0
+    register: hci_instances
+
 
   - name: delete instance controller
     os_server:
@@ -106,6 +122,32 @@
        count="{{ ceph_count }}"
 
 
+  - name: Wait for hci-instance deletion to complete
+    async_status: jid={{ item.ansible_job_id }}
+    register: hci_jobs
+    until: hci_jobs.finished
+    retries: 300
+    with_items: "{{ hci_instances.results }}"
+
+
+
+  - name: delete volumes for hci
+    os_volume:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       size: "{{ ceph_disk_size }}"
+       display_name: hci-volume{{ item }}
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
+
+
+
+
   - name: Wait for controller-instance deletion to complete
     async_status: jid={{ item.ansible_job_id }}
     register: controller_jobs
@@ -140,6 +182,10 @@
        network: "{{ network_pxe }}"
        no_security_groups: True
        validate_certs: False
+
+
+# controllers
+####
 
   - name: delete pxe port for controllers
     os_port:
@@ -235,7 +281,8 @@
     with_sequence:
        count="{{ controller_count }}"
 
-
+# compute
+####
 
   - name: delete pxe port for compute
     os_port:
@@ -299,7 +346,8 @@
     with_sequence:
        count="{{ compute_count }}"
 
-
+# ceph
+#####
 
   - name: delete pxe port for ceph
     os_port:
@@ -346,6 +394,86 @@
        validate_certs: False
     with_sequence:
        count="{{ ceph_count }}"
+
+# hci
+######
+
+  - name: delete pxe port for hci
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: pxe-hci{{ item }}
+       network: "{{ network_pxe }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
+
+
+  - name: delete internal api port for hci
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: intapi-hci{{ item }}
+       network: "{{ network_intapi }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
+
+  - name: delete tenant port for hci
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: tenant-hci{{ item }}
+       network: "{{ network_tenant }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
+
+
+  - name: delete storage port for hci
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storage-hci{{ item }}
+       network: "{{ network_storage }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
+
+  - name: delete storagemgmt port for hci
+    os_port:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: absent
+       name: storagemgmt-hci{{ item }}
+       network: "{{ network_storagemgmt }}"
+       no_security_groups: True
+       validate_certs: False
+    with_sequence:
+       count="{{ hci_count }}"
 
 
 
@@ -440,7 +568,6 @@
        name: "{{ project_name }}"
        password: "{{ project_password }}"
        domain: "{{ project_name }}"
-       endpoint_type: admin
        default_project: "{{ project_name }}"
        validate_certs: False
 
@@ -452,9 +579,9 @@
          username: "{{ cloud_admin }}"
          password: "{{ admin_password }}"
          project_name: "{{ admin_project }}"
+
        state: absent
        enabled: True
-       endpoint_type: admin
        name: "{{ project_name }}"
        validate_certs: False
 
