@@ -52,7 +52,7 @@ cd /var/www/html/hextupleo
 git clone https://github.com/OOsemka/hextupleo.git<br>
 
 sudo -u apache ssh-keygen -t rsa
-cp /usr/share/httpd/.ssh/id_rsa.pub nested-openstack/files/
+cp /usr/share/httpd/.ssh/id_rsa.pub hextupleo/nested-openstack/files/
 </pre>
 Let's change few config files:
 <pre>
