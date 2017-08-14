@@ -56,7 +56,7 @@ cp /usr/share/httpd/.ssh/id_rsa.pub hextupleo/nested-openstack/files/
 </pre>
 Let's change few config files:
 <pre>
-vi nested-openstack/vars/openstack_vars.yaml
+vi hextupleo/nested-openstack/vars/openstack_vars.yaml
 
     rhel_image: rhel7-raw  <-- this is the image that is going to be used for undercloud deployment
     pxe_image: pxeboot     <-- this is the image that will be used for all the overcloud nodes
@@ -80,7 +80,7 @@ vi nested-openstack/vars/openstack_vars.yaml
     network_storagemgmt: storagemgmt  <-- don't need to change that 
     
     
-vi vars/networks
+vi hextupleo/vars/networks
 
 
 Here is the example file. Ultimately you want to define multiple external subnets that will be used by your openstack children. This file is your local database of what is being consumed by which openstack deployment. Also make sure IP addresses don't overlap - the network has also need to be pre-created in OpenStack master 
@@ -91,8 +91,8 @@ id2 vlan315 172.31.5.0/24 172.31.5.1 172.31.5.110 172.31.5.119
 id3 vlan315 172.31.5.0/24 172.31.5.1 172.31.5.120 172.31.5.129
 
 
-vi nested-openstack/files/osp11/osp11.repo
-vi nested-openstack/files/osp10/osp10.repo
+vi hextupleo/nested-openstack/files/osp11/osp11.repo
+vi hextupleo/nested-openstack/files/osp10/osp10.repo
 
 These are repositories precreated with all OpenStack RH OSP rpms (you need to pre-create that first). Example:
 [rhel-7-server-extras-rpms]
