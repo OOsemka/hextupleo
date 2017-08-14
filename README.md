@@ -48,11 +48,14 @@ firewall-cmd  --reload
 <pre>
  
 chmod 777 /usr/share/httpd  
-cd /var/www/html/hextupleo
+cd /var/www/html
 git clone https://github.com/OOsemka/hextupleo.git<br>
 
 sudo -u apache ssh-keygen -t rsa
 cp /usr/share/httpd/.ssh/id_rsa.pub hextupleo/nested-openstack/files/
+
+chown -R apache:apache hextupleo/
+
 </pre>
 Let's change few config files:
 <pre>
