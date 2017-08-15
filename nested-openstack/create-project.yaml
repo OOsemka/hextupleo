@@ -1409,6 +1409,14 @@
       - ipmitool
       - deploy.sh
 
+  - name: rhel7.4 adds requiretty .. removing that option
+    become: yes
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: 'Defaults    requiretty.*'
+      line: '#Defaults    requiretty'
+
 
 
   - name: install fix-ironic daemon 1
@@ -1473,6 +1481,7 @@
       - vim-enhanced
       - screen
       - bash-completion
+      - mlocate
 
 
 

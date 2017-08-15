@@ -175,7 +175,7 @@ if((($_POST['user']) != '') && (($_POST['password']) != '')) {
         die('There was an error writing this file');
                        }
     else {
-        echo "<b>Log on to Horizon with just created user and password: <a href=https://10.9.65.100/dashboard/auth/login/?next=/dashboard/ target=_blank> https://10.9.65.100/dashboard</a></b> <br><hr>";
+        #echo "<b>Log on to Horizon with just created user and password: <a href=https://10.9.65.100/dashboard/auth/login/?next=/dashboard/ target=_blank> https://10.9.65.100/dashboard</a></b> <br><hr>";
         echo "<b>!!! This is still work in progress. Don't close this webpage until ansible playbook is done!!!</b> <br><hr>";
         $result = liveExecuteCommand('ansible-playbook nested-openstack/create-project.yaml  -e @vars/' . $_POST['user'] . '.yaml | tee logs/' . $_POST['user'] . '.log');
         #$result = liveExecuteCommand('ping -c 5 127.0.0.1');

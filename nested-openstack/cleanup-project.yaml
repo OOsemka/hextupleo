@@ -570,6 +570,7 @@
        domain: "{{ project_name }}"
        default_project: "{{ project_name }}"
        validate_certs: False
+       endpoint_type: admin
 
 
   -  name: delete projects  
@@ -584,4 +585,5 @@
        enabled: True
        name: "{{ project_name }}"
        validate_certs: False
+       endpoint_type: admin
 

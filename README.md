@@ -54,9 +54,6 @@ git clone https://github.com/OOsemka/hextupleo.git<br>
 sudo -u apache ssh-keygen -t rsa
 cp /usr/share/httpd/.ssh/id_rsa.pub hextupleo/nested-openstack/files/
 
-mkdir -p hextupleo/logs
-mkdir -p hextupleo/nested-openstack/files/instackenv/
-
 chown -R apache:apache hextupleo/
 
 </pre>

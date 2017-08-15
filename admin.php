@@ -105,7 +105,7 @@ $user_file = ($_POST['delete']);
 # save first available ip range to a variable
 #print_r($field);
     $user = $field[1][4];
-    $id = $field[7][4];
+    $id = $field[8][4];
     #$network = $field[1][1];
     #$cidr = $field[1][2];
     #$gateway = $field[1][3];

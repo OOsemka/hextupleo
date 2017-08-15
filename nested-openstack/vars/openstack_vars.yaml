@@ -12,6 +12,8 @@
     admin_password: changeme
     admin_project: admin
     os_auth: http://192.168.1.2:5000/v2.0
+    dns_server: 172.31.8.1
+    ntp_server: 172.31.8.1
     network_infra_ext: public 
     network_pxe: pxe
     network_intapi: internalapi
