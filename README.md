@@ -62,7 +62,6 @@ The two provider networks are going to be used for 2 roles:<br>
 <br>
 Right not at least the first External network should also be configured with 'Externel' neutron flag enabled <br>
 
-```
 <h1> HextupleO installation </h1>
 <pre>
 
