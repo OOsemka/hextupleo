@@ -1,0 +1,16 @@
+---
+-  name: Ensure user is {{ state }}
+   os_user:
+     auth:
+       auth_url: "{{ os_auth }}"
+       username: "{{ cloud_admin }}"
+       password: "{{ admin_password }}"
+       project_name: "{{ admin_project }}"
+     state: "{{ state }}"
+     endpoint_type: admin
+     name: "{{ project_name }}"
+     password: "{{ project_password }}"
+     #domain: "{{ project_name }}"
+     #default_project: "{{ project_name }}"
+     validate_certs: False
+   tags: user

@@ -1,0 +1,39 @@
+---
+    
+- name: Gathering facts on undercloud instance
+  os_server_facts:
+    auth:
+       auth_url: "{{ os_auth }}"
+       username: "{{ project_name }}"
+       password: "{{ project_password }}"
+       project_name: "{{ project_name }}"
+    server: undercloud
+    validate_certs: False
+  register: undercloud
+  tags:
+    - undercloud
+
+
+- name: add undercloud to ansible inventory
+  add_host:
+     name: undercloud
+     groups: openstack
+     ansible_host: "{{undercloud.ansible_facts.openstack_servers.0.public_v4}}"
+     ansible_user: cloud-user
+     ansible_become: true
+  tags:
+    - undercloud
+
+
+
+- name: verify undercloud is up and reachable
+  command: >
+    ssh -o BatchMode=yes -o StrictHostKeyChecking=no
+    cloud-user@{{undercloud.ansible_facts.openstack_servers.0.public_v4}} true
+  register: result
+  until: result|success
+  retries: 10
+  delay: 5
+  tags:
+    - undercloud
+

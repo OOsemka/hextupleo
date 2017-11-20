@@ -1,0 +1,33 @@
+---
+-  name: Ensure ceph cinder volumes for {{ project_name }} are {{ state }}
+   os_volume:
+      auth:
+        auth_url: "{{ os_auth }}"
+        username: "{{ project_name }}"
+        password: "{{ project_password }}"
+        project_name: "{{ project_name }}"
+      state: "{{ state }}"
+      size: "{{ ceph_disk_size }}"
+      display_name: ceph-volume{{ item }}
+      validate_certs: False
+   with_sequence:
+      count="{{ ceph_count }}"
+   tags: 
+     - volumes
+
+-  name: create volume for hci
+   os_volume:
+      auth:
+        auth_url: "{{ os_auth }}"
+        username: "{{ project_name }}"
+        password: "{{ project_password }}"
+        project_name: "{{ project_name }}"
+      state: "{{ state }}"
+      size: "{{ ceph_disk_size }}"
+      display_name: hci-volume{{ item }}
+      validate_certs: False
+   with_sequence:
+      count="{{ hci_count }}"
+   tags:
+     - volumes
+

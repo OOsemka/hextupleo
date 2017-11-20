@@ -105,7 +105,7 @@ $user_file = ($_POST['delete']);
 # save first available ip range to a variable
 #print_r($field);
     $user = $field[1][4];
-    $id = $field[8][4];
+#    $id = $field[8][4];
     #$network = $field[1][1];
     #$cidr = $field[1][2];
     #$gateway = $field[1][3];
@@ -116,8 +116,8 @@ $user_file = ($_POST['delete']);
 
 
 # comment out the line that are in use and add name of the user at the end
-    file_put_contents('vars/networks', str_replace("#" . $id . ' ',$id . ' ', file_get_contents('vars/networks')));
-    file_put_contents('vars/networks', str_replace(" " . $user . " "," ", file_get_contents('vars/networks')));
+#    file_put_contents('vars/networks', str_replace("#" . $id . ' ',$id . ' ', file_get_contents('vars/networks')));
+#    file_put_contents('vars/networks', str_replace(" " . $user . " "," ", file_get_contents('vars/networks')));
 
 
 
@@ -129,7 +129,7 @@ $user_file = ($_POST['delete']);
     #                   }
     #else {
         echo "<b>Deleting OpenStack for user $user. Don't close your webbrowser before ansible job finish</b> <br><hr>";
-        $result = liveExecuteCommand('time ansible-playbook nested-openstack/cleanup-project.yaml  -e @vars/' . $user . '.yaml | tee logs/' . $user . '-delete.log');
+        $result = liveExecuteCommand('ansible-playbook htplO-destroy-all.yml  -e @vars/' . $user . '.yaml | tee logs/' . $user . '-delete.log');
         rename('vars/' . $user . '.yaml','vars/oldclouds/' . $user . '.yaml');
         #$result = liveExecuteCommand('ping -c 5 127.0.0.1');
 

@@ -1,0 +1,140 @@
+---
+  - name: deploy instance undercloud
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: "{{ state }}"
+       name: undercloud
+       image: "{{ rhel_image }}"
+       key_name: "{{ keypair }}"
+       #timeout: 200
+       flavor: "{{ flavor_undercloud }}"
+       auto_ip: no
+       security_groups: hextupleO
+       validate_certs: False
+       nics:
+         - net-name: "{{ network_infra_ext }}"
+         - port-name: pxe-undercloud
+    register: undercloud
+
+
+  - name: deploy instance controllers
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: "{{ state }}"
+       name: controller{{ item }}
+       image: "{{ pxe_image }}"
+       key_name: "{{ keypair }}"
+       #timeout: 200
+       flavor: "{{ flavor_controller }}"
+       auto_ip: no
+       security_groups: hextupleO
+       validate_certs: False
+       nics:
+         - port-name: pxe-controller{{ item }}
+         - port-name: internalapi-controller{{ item }}
+         - port-name: tenant-controller{{ item }}
+         - port-name: storage-controller{{ item }}
+         - port-name: storagemgmt-controller{{ item }}
+         - port-name: "{{ project_name }}-external-controller{{ item }}"
+    with_sequence:
+       count="{{ controller_count }}"
+    async: 7200
+    poll: 0
+    register: controller_instances
+
+  - name: deploy instance compute
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: "{{ state }}"
+       name: compute{{ item }}
+       image: "{{ pxe_image }}"
+       key_name: "{{ keypair }}"
+       #timeout: 200
+       flavor: "{{ flavor_compute }}"
+       auto_ip: no
+       security_groups: hextupleO
+       validate_certs: False
+       nics:
+         - port-name: pxe-compute{{ item }}
+         - port-name: internalapi-compute{{ item }}
+         - port-name: tenant-compute{{ item }}
+         - port-name: storage-compute{{ item }}
+    with_sequence:
+       count="{{ compute_count }}"
+    async: 7200
+    poll: 0
+    register: compute_instances
+
+
+
+  - name: deploy instance ceph
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: "{{ state }}"
+       name: ceph{{ item }}
+       image: "{{ pxe_image }}"
+       key_name: "{{ keypair }}"
+       #timeout: 200
+       flavor: "{{ flavor_ceph }}"
+       auto_ip: no
+       security_groups: hextupleO
+       validate_certs: False
+       nics:
+         - port-name: pxe-ceph{{ item }}
+         - port-name: storage-ceph{{ item }}
+         - port-name: storagemgmt-ceph{{ item }}
+       volumes:
+         - ceph-volume{{ item }}
+    with_sequence:
+       count="{{ ceph_count }}"
+    async: 7200
+    poll: 0
+    register: ceph_instances
+
+  - name: deploy instance hci
+    os_server:
+       auth:
+         auth_url: "{{ os_auth }}"
+         username: "{{ project_name }}"
+         password: "{{ project_password }}"
+         project_name: "{{ project_name }}"
+       state: "{{ state }}"
+       name: hci{{ item }}
+       image: "{{ pxe_image }}"
+       key_name: "{{ keypair }}"
+       #timeout: 200
+       flavor: "{{ flavor_hci }}"
+       auto_ip: no
+       security_groups: hextupleO
+       validate_certs: False
+       nics:
+         - port-name: pxe-hci{{ item }}
+         - port-name: internalapi-hci{{ item }}
+         - port-name: tenant-hci{{ item }}
+         - port-name: storage-hci{{ item }}
+         - port-name: storagemgmt-hci{{ item }}
+       volumes:
+         - hci-volume{{ item }}
+
+    with_sequence:
+       count="{{ hci_count }}"
+    async: 7200
+    poll: 0
+    register: hci_instances
+

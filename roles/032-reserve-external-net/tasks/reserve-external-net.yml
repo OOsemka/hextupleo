@@ -1,0 +1,15 @@
+---
+-  name: Reserve External IP pool for controllers and floating IPs
+   shell: grep "^[^#;]"  files/networks.csv | head -n 1 | awk -F "," {'print $1'}
+   register: available
+
+- replace:
+    path: files/networks.csv
+    regexp: "^{{ available.stdout }}"
+    replace: "#{{ available.stdout }}"
+
+- replace:
+    path: files/networks.csv
+    regexp: "{{ lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=5') }}"
+    replace: "{{ lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=5') }},{{ project_name }}"
+

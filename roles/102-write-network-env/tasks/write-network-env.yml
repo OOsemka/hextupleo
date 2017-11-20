@@ -1,0 +1,7 @@
+---
+    
+- name: Create network-environment.yaml file
+  template:
+    src: files/{{ osp }}/network-environment.j2
+    dest: files/network-environment/{{ project_name }}-network-environment.yaml
+

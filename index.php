@@ -87,6 +87,12 @@ HCI Count (max 3):
 <input type="number" name="hci" min="0" max="3" value="0">
 </th>
 </tr>
+<tr>
+   <th>How far do you want to go?</th>
+   <th><input type="radio" name="install_progress" value="infra" checked> infra <input type="radio" name="install_progress" value="undercloud"> undercloud </th>
+</tr>
+
+
 </table>
 </div>
 </form>
@@ -135,49 +141,50 @@ if((($_POST['user']) != '') && (($_POST['password']) != '')) {
   
 
 #browse through the network file and break it down into array
+# this is no longer needed .. I moved this functionality to be handled by ansible directly
  
-   $delimiter = " ";
-   $eoldelimiter = "\n";
-   $fp = fopen("vars/networks", "r") or die("Unable to open file!");
-   $loop = 0;
-   while (!feof($fp)) {
-    $line = stream_get_line($fp, 4096, $eoldelimiter); 
+#   $delimiter = " ";
+#   $eoldelimiter = "\n";
+#   $fp = fopen("vars/networks", "r") or die("Unable to open file!");
+#   $loop = 0;
+#   while (!feof($fp)) {
+#    $line = stream_get_line($fp, 4096, $eoldelimiter); 
 
-    if ($line[0] === '#') continue;  //Skip lines that start with #
-    $loop++;
-    $field[$loop] = explode ($delimiter, $line);
-    $fp++;
-                      }
+#   if ($line[0] === '#') continue;  //Skip lines that start with #
+#   $loop++;
+#    $field[$loop] = explode ($delimiter, $line);
+#    $fp++;
+#                      }
 
-   fclose($fp);
+#   fclose($fp);
 # save first available ip range to a variable
 
-    $id = $field[1][0];
-    $network = $field[1][1];
-    $cidr = $field[1][2];
-    $gateway = $field[1][3];
-    $firstip = $field[1][4];
-    $lastip = $field[1][5];
-    $network_file = 'vars/networks';
+#    $id = $field[1][0];
+#    $network = $field[1][1];
+#    $cidr = $field[1][2];
+#    $gateway = $field[1][3];
+#    $firstip = $field[1][4];
+#    $lastip = $field[1][5];
+#    $network_file = 'vars/networks';
 
 
 
 # comment out the line that are in use and add name of the user at the end
-    file_put_contents('vars/networks', str_replace($id . ' ', "#" . $id . ' ', file_get_contents('vars/networks')));
-    file_put_contents('vars/networks', str_replace($lastip, $lastip . ' ' . $_POST['user'] . ' ', file_get_contents('vars/networks')));
+#    file_put_contents('vars/networks', str_replace($id . ' ', "#" . $id . ' ', file_get_contents('vars/networks')));
+#    file_put_contents('vars/networks', str_replace($lastip, $lastip . ' ' . $_POST['user'] . ' ', file_get_contents('vars/networks')));
 
 
 
-    $data = '   project_name: ' . $_POST['user'] . "\n" . '   project_password: ' . $_POST['password'] . "\n" . '   controller_count: ' . $_POST['controller'] . "\n" . '   compute_count: ' . $_POST['compute'] . "\n" . '   ceph_count: ' . $_POST['ceph'] . "\n" . '   hci_count: ' . $_POST['hci'] . "\n" . '   osp: ' . $_POST['osp'] . "\n" . '   id: ' . "$id \n" . '   network_external: ' . "$network \n" . '   cidr: ' . "$cidr \n" . '   gateway: ' . "$gateway \n" . '   firstip: ' . "$firstip \n" . '   lastip: ' . "$lastip \n";
+    $data = '   project_name: ' . $_POST['user'] . "\n" . '   project_password: ' . $_POST['password'] . "\n" . '   controller_count: ' . $_POST['controller'] . "\n" . '   compute_count: ' . $_POST['compute'] . "\n" . '   ceph_count: ' . $_POST['ceph'] . "\n" . '   hci_count: ' . $_POST['hci'] . "\n" . '   osp: ' . $_POST['osp'] . "\n" . '   install_progress: ' . $_POST['install_progress'] . "\n";
 
-    $ret = file_put_contents('/var/www/html/hextupleo/vars/' . $_POST['user'] . '.yaml', $data, LOCK_EX);
+    $ret = file_put_contents('/var/www/html/hextupleO/vars/' . $_POST['user'] . '.yaml', $data, LOCK_EX);
     if($ret === false) {
         die('There was an error writing this file');
                        }
     else {
         #echo "<b>Log on to Horizon with just created user and password: <a href=https://10.9.65.100/dashboard/auth/login/?next=/dashboard/ target=_blank> https://10.9.65.100/dashboard</a></b> <br><hr>";
         echo "<b>!!! This is still work in progress. Don't close this webpage until ansible playbook is done!!!</b> <br><hr>";
-        $result = liveExecuteCommand('ansible-playbook nested-openstack/create-project.yaml  -e @vars/' . $_POST['user'] . '.yaml | tee logs/' . $_POST['user'] . '.log');
+        $result = liveExecuteCommand('ansible-playbook htplO-build-all.yml  -e @vars/' . $_POST['user'] . '.yaml | tee logs/' . $_POST['user'] . '.log');
         #$result = liveExecuteCommand('ping -c 5 127.0.0.1');
 
         

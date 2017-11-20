@@ -1,2 +1,0 @@
-#id network   cidr           gateway    first ip    last ip
-id1 vlan315 172.31.5.0/24 172.31.5.1 172.31.5.100 172.31.5.109   

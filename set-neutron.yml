@@ -1,0 +1,15 @@
+---
+- name: set-quotas
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 030-neutron-networks
+    - role: 031-neutron-subnets
+    - role: 032-reserve-external-net
+    - role: 034-neutron-ports
+    - role: 035-ports-security
+    - role: 036-instackenv

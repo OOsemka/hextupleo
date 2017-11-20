@@ -1,0 +1,10 @@
+---
+- name: set-instances
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 050-nova-instances
