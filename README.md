@@ -60,7 +60,7 @@ The two provider networks are going to be used for 2 roles:<br>
 - providing external IP to nested undercloud - and in the future for any supporting roles that require external ip like Cloudforms, Ansible Tower, Satellite etc.<br>
 - External IP and Floating IPs to nested Overcloud Controllers<br>
 <br>
-Right not at least the first External network should also be configured with 'Externel' neutron flag enabled <br>
+Right not at least the first External network should also be configured with 'External' neutron flag enabled <br>
 
 <h1> HextupleO installation </h1>
 <pre>
