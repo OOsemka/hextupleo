@@ -17,6 +17,13 @@
     repo_server: http://172.31.8.1/repos/
     # Specify how do you want to consume hextupleO - options are (tower, core, http) - core default
     deployment_type: core
+    # Proxy environment
+    proxy_env:
+      http_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
+      https_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
+    # allow for more leniency when using ssl with self-signed certs
+    shade_env:
+      PYTHONWARNINGS: "ignore:Certificate has no, ignore:A true SSLContext object is not available, ignore:Certificate for"
 
     # Flavors used for nested OpenStack roles
     flavors:

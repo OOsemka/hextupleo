@@ -9,13 +9,16 @@
 
     - name: Get epel rpm
       get_url: url=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm dest=/tmp/
+      environment: "{{proxy_env}}"
     - name: uninstall any previous epels
       yum:
         name: epel-release
         state: absent
+      environment: "{{proxy_env}}"
 
     - name: install epel
       shell: "yum -y install /tmp/epel-release-latest-7.noarch.rpm"
+      environment: "{{proxy_env}}"
 
     - name: install pre-reqs
       yum: 
@@ -34,9 +37,12 @@
         - rhel-guest-image-7
         - libguestfs-tools
         - qemu-img
-    -  name: install shade libraries
-       pip:
+      environment: "{{proxy_env}}"
+
+    - name: install shade libraries
+      pip:
          name: shade
+      environment: "{{proxy_env}}"
 
     - name: install http and php if custom webform picked
       yum:
@@ -118,70 +124,74 @@
 
 
 
-    -  name: convert rhel7 qcow2 to raw to get better performance with ceph
-       shell: "qemu-img  convert /usr/share/rhel-guest-image-7/rhel-guest-image*.qcow2 /tmp/rhel7.raw"
-    -  name: download pxeboot.img
-       get_url: url=https://github.com/OOsemka/hextupleo/raw/master/pxeboot.img dest=/tmp/pxeboot.img
-    -  name: upload images to OpenStack - pxeboot.img
-       os_image:
-         auth:
-           auth_url: "{{ os_auth }}"
-           username: "{{ cloud_admin }}"
-           password: "{{ admin_password }}"
-           project_name: "{{ admin_project }}"
-         name: pxeboot
-         container_format: bare
-         disk_format: qcow2
-         state: present
-         is_public: yes
-         filename: /tmp/pxeboot.img
-         validate_certs: False
+    - name: convert rhel7 qcow2 to raw to get better performance with ceph
+      shell: "qemu-img  convert /usr/share/rhel-guest-image-7/rhel-guest-image*.qcow2 /tmp/rhel7.raw"
+    - name: download pxeboot.img
+      get_url: url=https://github.com/OOsemka/hextupleo/raw/master/pxeboot.img dest=/tmp/pxeboot.img
+      environment: "{{proxy_env}}"
+    - name: upload images to OpenStack - pxeboot.img
+      os_image:
+        auth:
+          auth_url: "{{ os_auth }}"
+          username: "{{ cloud_admin }}"
+          password: "{{ admin_password }}"
+          project_name: "{{ admin_project }}"
+        name: pxeboot
+        container_format: bare
+        disk_format: qcow2
+        state: present
+        is_public: yes
+        filename: /tmp/pxeboot.img
+        validate_certs: False
+      environment: "{{shade_env}}"
 
-    -  name: upload images to OpenStack- rhel7
-       os_image:
-         auth:  
-           auth_url: "{{ os_auth }}"
-           username: "{{ cloud_admin }}"
-           password: "{{ admin_password }}"
-           project_name: "{{ admin_project }}"
-         name: rhel7-pre
-         container_format: bare
-         disk_format: raw
-         state: present
-         filename: /tmp/rhel7.raw
-         validate_certs: False
+    - name: upload images to OpenStack- rhel7
+      os_image:
+        auth:  
+          auth_url: "{{ os_auth }}"
+          username: "{{ cloud_admin }}"
+          password: "{{ admin_password }}"
+          project_name: "{{ admin_project }}"
+        name: rhel7-pre
+        container_format: bare
+        disk_format: raw
+        state: present
+        filename: /tmp/rhel7.raw
+        validate_certs: False
+      environment: "{{shade_env}}"
 
+    - name: create nova flavors
+      os_nova_flavor:
+        auth: 
+          auth_url: "{{ os_auth }}"
+          username: "{{ cloud_admin }}"
+          password: "{{ admin_password }}"
+          project_name: "{{ admin_project }}"
+        name: "{{ item.value.name }}"
+        state: present
+        ram: "{{ item.value.ram }}"
+        vcpus: "{{ item.value.vcpu }}"
+        disk: "{{ item.value.disk }}"
+        validate_certs: False
+      with_dict: "{{ flavors }}"
+      environment: "{{shade_env}}"
 
-
-    -  name: create nova flavors
-       os_nova_flavor:
-         auth: 
-           auth_url: "{{ os_auth }}"
-           username: "{{ cloud_admin }}"
-           password: "{{ admin_password }}"
-           project_name: "{{ admin_project }}"
-         name: "{{ item.value.name }}"
-         state: present
-         ram: "{{ item.value.ram }}"
-         vcpus: "{{ item.value.vcpu }}"
-         disk: "{{ item.value.disk }}"
-         validate_certs: False
-       with_dict: "{{ flavors }}"
-
-
-
-    -  name: create repo files from templates - osp10
-       template:
-         src: templates/osp10.j2
-         dest: files/osp10/osp10.repo
-    -  name: create repo files from templates - osp11
-       template:
-         src: templates/osp11.j2
-         dest: files/osp11/osp11.repo
-    -  name: create static variable file
-       template:
-         src: templates/static-variables.j2
-         dest: roles/001-include-vars/vars/openstack-static.yml
+    - name: create repo files from templates - osp9
+      template:
+        src: templates/osp9.j2
+        dest: files/osp10/osp9.repo
+    - name: create repo files from templates - osp10
+      template:
+        src: templates/osp10.j2
+        dest: files/osp10/osp10.repo
+    - name: create repo files from templates - osp11
+      template:
+        src: templates/osp11.j2
+        dest: files/osp11/osp11.repo
+    - name: create static variable file
+      template:
+        src: templates/static-variables.j2
+        dest: roles/001-include-vars/vars/openstack-static.yml
 
     - name: copy id_rsa.pub to local files directory
       copy:
@@ -219,7 +229,7 @@
       when: deployment_type == "tower"
 
 
-    - name: for Tower deployment -  copy the hextupleO to /var/lib/awx/projects/hextupleO
+    - name: for Tower deployment - copy the hextupleO to /var/lib/awx/projects/hextupleO
       copy:
         src: ../
         dest: /var/lib/awx/projects/hextupleO/
@@ -316,6 +326,7 @@
          name: ansible
          validate_certs: False
          public_key_file: files/id_rsa.pub
+      environment: "{{shade_env}}"
 
     - name: Create security group to allow ssh traffic
       os_security_group:
@@ -328,7 +339,7 @@
          name: rhel7-pre
          description: security group for building updated rhel7
          validate_certs: False
-
+      environment: "{{shade_env}}"
 
     - name: Add rules to enable ssh port
       os_security_group_rule:
@@ -343,8 +354,7 @@
          port_range_max: 22
          remote_ip_prefix: 0.0.0.0/0
          validate_certs: False
-
-
+      environment: "{{shade_env}}"
 
     - name: deploy vanilla rhel7
       os_server:
@@ -365,7 +375,7 @@
          nics:
            - net-name: "{{ external_net }}"
       register: rhel7pre
-
+      environment: "{{shade_env}}"
 
     - name: add rhel7-pre to ansible inventory
       add_host:
@@ -375,18 +385,14 @@
          ansible_user: cloud-user
          ansible_become: true
 
-
-
     - name: verify rhel7-pre is up and reachable
       command: >
         ssh -o BatchMode=yes -o StrictHostKeyChecking=no
         cloud-user@{{rhel7pre.openstack.accessIPv4}} true
       register: result
       until: result|success
-      retries: 10
+      retries: 20
       delay: 5
-
-
 
 
 
@@ -444,11 +450,6 @@
       retries: 20
       delay: 10
 
-
-
-
-
-
     - name: stop updated rhel7
       os_server_actions:
         auth:
@@ -460,6 +461,7 @@
         action: stop
         #timeout: 200
         validate_certs: False
+      environment: "{{shade_env}}"
 
     - name: take a snapshot of the updated rhel7
       shell: openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}" --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}" --insecure server image create --name rhel7-updated rhel7-pre
@@ -470,6 +472,4 @@
 
     - name: make a new rhel7-updated image public
       shell: openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}" --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}" --insecure image set --public rhel7-updated
-
-
-
+      environment: "{{shade_env}}"
