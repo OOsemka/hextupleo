@@ -1,12 +1,26 @@
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild controller1 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild controller2 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild controller3 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild compute1 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild compute2 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild compute3 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild ceph1 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild ceph2 {{ pxe_image }}
-nova --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure rebuild ceph3 {{ pxe_image }}
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} ceph1
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} ceph2
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} ceph3
+
+
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild --image {{ pxe_image }} controller1
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} controller2
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} controller3
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} compute1
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} compute2
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server rebuild  --image {{ pxe_image }} compute3
+
+
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server remove volume  ceph1 ceph-volume1
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server remove volume  ceph2 ceph-volume2
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server remove volume  ceph3 ceph-volume3
+
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server add volume  ceph1 ceph-volume1
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server add volume  ceph2 ceph-volume2
+openstack --os-auth-url {{ os_auth }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --os-identity-api-version 2 --insecure server add volume  ceph3 ceph-volume3
+
+
 
 source ~/stackrc
 for i in `ironic node-list | grep error | awk {'print $2'}`; do ironic node-set-provision-state $i deleted;done
+

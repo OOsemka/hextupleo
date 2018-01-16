@@ -59,7 +59,7 @@
 
   - name: create deploy.sh
     template:
-      src: files/deploy.j2
+      src: files/{{ osp }}/deploy-{{ osp }}.j2
       dest: "/home/stack/GoodieBag/deploy.sh"
       mode: 0744
       owner: stack
@@ -135,7 +135,23 @@
       - compute-hci.yaml
       - ceph-storage.yaml
 
- 
+  - name: copy osp12 specific templates
+    copy: src=files/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
+    with_items:
+      - ceph-custom-config.yaml
+      - host-memory.yaml
+    when: osp == "osp12"
+
+
+  - name: create osp12 specific templates
+    template:
+      src: files/{{ osp }}/node-info.j2
+      dest: "/home/stack/templates/node-info.yaml"
+      mode: 0644
+      owner: stack
+      group: stack
+    when: osp == "osp12"
+
 
 
   - name: upgrade all packages

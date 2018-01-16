@@ -1,4 +1,4 @@
-#id,network,cidr,gateway,firstip,lastip,cf1,reservedby
+#id,network,cidr,gateway,firstip,lastip,reservedby
 id1,provider1,172.31.6.0/24,172.31.6.254,172.31.6.100,172.31.6.109
 id2,provider1,172.31.6.0/24,172.31.6.254,172.31.6.110,172.31.6.119
 id3,provider1,172.31.6.0/24,172.31.6.254,172.31.6.120,172.31.6.129

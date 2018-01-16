@@ -7,18 +7,41 @@
 
   tasks:
 
+
+    - name: Get epel rpm
+      get_url: url=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm dest=/tmp/
+      when: proxy_required == False
+
+    - name: uninstall any previous epels
+      yum:
+        name: epel-release
+        state: absent
+      when: proxy_required == False
+
+
     - name: Get epel rpm
       get_url: url=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm dest=/tmp/
       environment: "{{proxy_env}}"
+      when: proxy_required == True
+
     - name: uninstall any previous epels
       yum:
         name: epel-release
         state: absent
       environment: "{{proxy_env}}"
+      when: proxy_required == True
+
+
+    - name: install epel
+      shell: "yum -y install /tmp/epel-release-latest-7.noarch.rpm"
+      when: proxy_required == False
+
 
     - name: install epel
       shell: "yum -y install /tmp/epel-release-latest-7.noarch.rpm"
       environment: "{{proxy_env}}"
+      when: proxy_required == True
+
 
     - name: install pre-reqs
       yum: 
@@ -37,12 +60,43 @@
         - rhel-guest-image-7
         - libguestfs-tools
         - qemu-img
+      when: proxy_required == False
+
+
+    - name: install pre-reqs
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - python-pip
+        - python-wheel
+        - ansible
+        - gcc
+        - python-devel
+        - python-neutronclient
+        - python-novaclient
+        - python-openstackclient
+        - wget
+        - rhel-guest-image-7
+        - libguestfs-tools
+        - qemu-img
       environment: "{{proxy_env}}"
+      when: proxy_required == True
+
+
+    - name: install shade libraries
+      pip:
+         name: shade
+      when: proxy_required == False
+
 
     - name: install shade libraries
       pip:
          name: shade
       environment: "{{proxy_env}}"
+      when: proxy_required == True
+
+
 
     - name: install http and php if custom webform picked
       yum:
@@ -126,9 +180,17 @@
 
     - name: convert rhel7 qcow2 to raw to get better performance with ceph
       shell: "qemu-img  convert /usr/share/rhel-guest-image-7/rhel-guest-image*.qcow2 /tmp/rhel7.raw"
+
+    - name: download pxeboot.img
+      get_url: url=https://github.com/OOsemka/hextupleo/raw/master/pxeboot.img dest=/tmp/pxeboot.img
+      when: proxy_required == False
+
+
     - name: download pxeboot.img
       get_url: url=https://github.com/OOsemka/hextupleo/raw/master/pxeboot.img dest=/tmp/pxeboot.img
       environment: "{{proxy_env}}"
+      when: proxy_required == True
+
     - name: upload images to OpenStack - pxeboot.img
       os_image:
         auth:
@@ -179,7 +241,7 @@
     - name: create repo files from templates - osp9
       template:
         src: templates/osp9.j2
-        dest: files/osp10/osp9.repo
+        dest: files/osp9/osp9.repo
     - name: create repo files from templates - osp10
       template:
         src: templates/osp10.j2
@@ -188,6 +250,13 @@
       template:
         src: templates/osp11.j2
         dest: files/osp11/osp11.repo
+
+    - name: create repo files from templates - osp12
+      template:
+        src: templates/osp12.j2
+        dest: files/osp11/osp12.repo
+
+
     - name: create static variable file
       template:
         src: templates/static-variables.j2
