@@ -17,17 +17,12 @@
     repo_server: http://172.31.8.1/repos/
     # Specify how do you want to consume hextupleO - options are (tower, core, http) - core default
     deployment_type: core
-    # If your environment requires proxy for outside connectivity, please change flag below to True
-    proxy_required: False
-    # Proxy environment
+    # If your environment requires proxy for outside connectivity, please use the 3 variables below
+    # , otherwise, comment out what's not need but -leave- 'proxy_env' abnd 'no_proxy' defined.
     proxy_env:
       http_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
       https_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
-    when: proxy_required == True
-    proxy_env:
       no_proxy: localhost
-    when: proxy_required == False
-    # allow for more leniency when using ssl with self-signed certs
     shade_env:
       PYTHONWARNINGS: "ignore:Certificate has no, ignore:A true SSLContext object is not available, ignore:Certificate for"
 
