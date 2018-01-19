@@ -26,6 +26,31 @@
       name: sshd
       state: restarted
 
+  - name: Allow NTP clients
+    lineinfile:
+      path: /etc/chrony.conf
+      state: present
+      regexp: '^allow 0\.0\.0\.0/0$'
+      line: 'allow 0.0.0.0/0'
+
+  - name: start and enable chronyd service
+    service:
+      name: chronyd
+      enabled: yes
+      state: restarted
+
+  - name: Enable iptables access to local NTP server
+    shell: iptables -A INPUT -p udp --dport 123 -j ACCEPT ; iptables -A OUTPUT -p udp --sport 123 -j ACCEPT
+    ignore_errors: true
+
+  - name: Add NAT rule on for nodes that cannot reach out to DNS/NTP servers directly
+    shell: /usr/sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    ignore_errors: true
+
+  - name: Save NAT rules
+    shell: /sbin/iptables-save > /etc/sysconfig/iptables
+    ignore_errors: true
+
   - name: Create Stack sub-directories
     file:
       path: /home/stack/{{ item }}
