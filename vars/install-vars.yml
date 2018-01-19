@@ -9,8 +9,9 @@
     os_auth: https://openstack.home.lab:13000/v2.0
     # NTP server that will be reachable in nested overcloud
     ntp_server: 172.31.8.1
-    # DNS server that will be reachable from nested overcloud
-    dns_server: 172.31.8.1
+    # DNS servers which will be reachable from nested overcloud
+    dns_server1: 172.31.8.1
+    dns_server1: 172.31.8.2
     # First out of 2 external networks. This one is used mainly for undercloud and supporting roles
     external_net: provider2
     # Pre-build local rpm repository to OSP and Ceph 
