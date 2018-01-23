@@ -49,7 +49,7 @@ parameter_defaults:
   # Use either this parameter or ControlPlaneDefaultRoute in the NIC templates
   # ManagementInterfaceDefaultRoute: 10.0.1.1
   # Define the DNS servers (maximum 2) for the overcloud nodes
-  DnsServers: ["{{ dns_server }}","8.8.4.4"]
+  DnsServers: ["{{ dns_server1 }}","{{ dns_server2 }}"]
   # List of Neutron network types for tenant networks (will be used in order)
   NeutronNetworkType: 'vxlan,vlan'
   # The tunnel type for the tenant network (vxlan or gre). Set to '' to disable tunneling.

@@ -15,11 +15,11 @@
        auto_ip: no
        security_groups: hextupleO
        validate_certs: False
+       availability_zone: "{{ project_availability_zone }}"
        nics:
          - net-name: "{{ network_infra_ext }}"
          - port-name: pxe-undercloud
     register: undercloud
-
 
   - name: deploy instance controllers
     os_server:
@@ -37,6 +37,7 @@
        auto_ip: no
        security_groups: hextupleO
        validate_certs: False
+       availability_zone: "{{ project_availability_zone }}"
        nics:
          - port-name: pxe-controller{{ item }}
          - port-name: internalapi-controller{{ item }}
@@ -66,6 +67,7 @@
        auto_ip: no
        security_groups: hextupleO
        validate_certs: False
+       availability_zone: "{{ project_availability_zone }}"
        nics:
          - port-name: pxe-compute{{ item }}
          - port-name: internalapi-compute{{ item }}
@@ -95,6 +97,7 @@
        auto_ip: no
        security_groups: hextupleO
        validate_certs: False
+       availability_zone: "{{ project_availability_zone }}"
        nics:
          - port-name: pxe-ceph{{ item }}
          - port-name: storage-ceph{{ item }}
@@ -123,6 +126,7 @@
        auto_ip: no
        security_groups: hextupleO
        validate_certs: False
+       availability_zone: "{{ project_availability_zone }}"
        nics:
          - port-name: pxe-hci{{ item }}
          - port-name: internalapi-hci{{ item }}

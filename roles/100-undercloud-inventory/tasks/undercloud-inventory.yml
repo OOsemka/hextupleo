@@ -13,6 +13,10 @@
   tags:
     - undercloud
 
+- name: Display all variables/facts known for a host
+  debug:
+    var: hostvars[inventory_hostname]
+    verbosity: 3
 
 - name: add undercloud to ansible inventory
   add_host:

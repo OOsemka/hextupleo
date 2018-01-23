@@ -391,6 +391,7 @@
 
     - name: Make sure rhel7-pre is started (if already created)
       shell: openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}" --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}" --insecure server start rhel7-pre
+      ignore_errors: true
 
     - name: verify rhel7-pre is up and reachable
       command: >
