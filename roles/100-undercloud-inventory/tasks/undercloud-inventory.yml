@@ -40,7 +40,7 @@
   tags:
     - undercloud
   ignore_errors: true
-  when: update_guest_packages is defined and update_guest_packages == False
+  when: not update_guest_packages | bool
 
 - name: Make sure undercloud is restarted (el7.2 issue where sshd doesn't start on first boot)
   shell: >
@@ -50,7 +50,7 @@
   #retries: 2
   delay: 1
   ignore_errors: true
-  when: update_guest_packages is defined and update_guest_packages == False
+  when: not update_guest_packages | bool
 
 - name: verify undercloud is up and reachable (again)
   command: >

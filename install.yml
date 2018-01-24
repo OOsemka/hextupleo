@@ -416,10 +416,10 @@
       become: yes
 
 
-    - name: upgrade all packages - this might take a while ( when 'update_guest_packages' is 'True' )
+    - name: upgrade all packages - this might take a while ( when 'update_guest_packages' is 'true' )
       yum: name="*" state=latest
       become: yes
-      when: update_guest_packages is defined and update_guest_packages == True
+      when: update_guest_packages | bool
     - name: install tools
       yum: name="{{ item }}" state=latest
       become: yes
