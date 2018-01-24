@@ -16,7 +16,7 @@
 - name: Display all variables/facts known for a host
   debug:
     var: hostvars[inventory_hostname]
-    verbosity: 3
+    verbosity: 1
 
 - name: add undercloud to ansible inventory
   add_host:
@@ -29,8 +29,7 @@
     - undercloud
 
 
-
-- name: verify undercloud is up and reachable
+- name: verify undercloud is up and reachable (Ignore errors set for el7.2)
   command: >
     ssh -o BatchMode=yes -o StrictHostKeyChecking=no
     cloud-user@{{undercloud.ansible_facts.openstack_servers.0.public_v4}} true
@@ -40,4 +39,27 @@
   delay: 5
   tags:
     - undercloud
+  ignore_errors: true
+  when: update_guest_packages is defined and update_guest_packages == False
 
+- name: Make sure undercloud is restarted (el7.2 issue where sshd doesn't start on first boot)
+  shell: >
+     openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ project_name }}"
+     --os-username "{{ project_name }}" --os-password "{{ project_password }}"
+     --insecure server reboot undercloud
+  #retries: 2
+  delay: 1
+  ignore_errors: true
+  when: update_guest_packages is defined and update_guest_packages == False
+
+- name: verify undercloud is up and reachable (again)
+  command: >
+    ssh -o BatchMode=yes -o StrictHostKeyChecking=no
+    cloud-user@{{undercloud.ansible_facts.openstack_servers.0.public_v4}} true
+  register: result
+  until: result|success
+  retries: 10
+  delay: 5
+  tags:
+    - undercloud
+  ignore_errors: true
