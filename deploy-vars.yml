@@ -8,5 +8,4 @@
   project_password: Passw0rd
   # options are infra (default) or undercloud
   install_progress: infra
-  project_availability_zone: nova
 
