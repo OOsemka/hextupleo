@@ -178,7 +178,7 @@
 
   - name: upgrade all packages ( when 'update_guest_packages' is 'True' )
     yum: name="*" state=latest
-    when: update_guest_packages is defined and update_guest_packages == True
+    when: update_guest_packages | bool
 
   - name: install tools
     yum: name="{{ item }}" state=latest
