@@ -7,7 +7,12 @@ rhel-7-server-openstack-11-devtools-rpms
 rhel-7-server-openstack-11-optools-rpms
 rhel-7-server-openstack-11-rpms
 rhel-7-server-openstack-11-tools-rpms
+rhel-7-server-openstack-12-devtools-rpms
+rhel-7-server-openstack-12-optools-rpms
+rhel-7-server-openstack-12-rpms
+rhel-7-server-openstack-12-tools-rpms
 rhel-7-server-openstack-9-optools-rpms
+rhel-7-server-openstack-9-director-rpms
 rhel-7-server-openstack-9-rpms
 rhel-7-server-openstack-9-tools-rpms
 rhel-7-server-optional-rpms
