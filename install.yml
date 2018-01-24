@@ -390,7 +390,10 @@
          ansible_become: true
 
     - name: Make sure rhel7-pre is started (if already created)
-      shell: openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}" --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}" --insecure server start rhel7-pre
+      shell: >
+         openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}"
+         --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}"
+         --insecure server start rhel7-pre
       ignore_errors: true
 
     - name: verify rhel7-pre is up and reachable
@@ -399,7 +402,7 @@
         cloud-user@{{rhel7pre.openstack.accessIPv4}} true
       register: result
       until: result|success
-      retries: 20
+      retries: 40
       delay: 5
 
 
@@ -413,9 +416,10 @@
       become: yes
 
 
-    - name: upgrade all packages - this might take a while
+    - name: upgrade all packages - this might take a while ( when 'update_guest_packages' is 'True' )
       yum: name="*" state=latest
       become: yes
+      when: update_guest_packages is defined and update_guest_packages == True
     - name: install tools
       yum: name="{{ item }}" state=latest
       become: yes
@@ -448,7 +452,6 @@
   vars_files:
     - vars/install-vars.yml
 
-  tasks:
     - name: verify rhel7pre rebooted after yum update
       command: >
         ssh -o BatchMode=yes -o StrictHostKeyChecking=no
@@ -470,6 +473,11 @@
         #timeout: 200
         validate_certs: False
       environment: "{{shade_env}}"
+
+    - name: remove previous rhel7-updated image
+      shell: openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}" --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}" --insecure image delete rhel7-updated
+      environment: "{{shade_env}}"
+      ignore_errors: true
 
     - name: take a snapshot of the updated rhel7
       shell: openstack --os-auth-url "{{ os_auth }}" --os-project-name "{{ admin_project }}" --os-username "{{ cloud_admin }}" --os-password "{{ admin_password }}" --insecure server image create --name rhel7-updated rhel7-pre
