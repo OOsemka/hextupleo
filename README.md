@@ -29,7 +29,9 @@ This project has been recently enhanced with ability to automatically deploy wit
 <br>
 Create a node (example RHEL VM) that will have access to RPM repositories, your master OpenStack deployment on both Public and Admin endpoints.<br>
 This could look the same as your undercloud 1x External net + 1 PXE net <br>
-RHEL7 VM should be connected to RH repos - preferable latest OSP repos.<br>
+This RHEL7 VM should be connected to RHSM repos - preferable latest OSP repos.<br>
+If you plan on using that VM as a local repo server, please edit 'repo_server'<br>
+accordingly and run include script (make_local_repos.sh)<br>
 <br>
 <br>
 The master OpenStack deployment have to be configured with nested-kvm enabled .. please reference this example if you don't know how to configure that:<br>
@@ -85,14 +87,23 @@ Let's ensure variables is config files match our environment:
     os_auth: https://openstack.home.lab:13000/v2.0
     # NTP server that will be reachable in nested overcloud
     ntp_server: 172.31.8.1
-    # DNS server that will be reachable from nested overcloud
-    dns_server: 172.31.8.1
+    # DNS servers which will be reachable from nested overcloud
+    dns_server1: 172.31.8.1
+    dns_server1: 172.31.8.2
     # First out of 2 external networks. This one is used mainly for undercloud and supporting roles
     external_net: provider2
     # Pre-build local rpm repository to OSP and Ceph
     repo_server: http://172.31.8.1/repos/
     # Specify how do you want to consume hextupleO - options are (tower, core, http) - core default
-    deployment_type: tower
+    deployment_type: core
+    # If your environment requires proxy for outside connectivity, please use the 3 variables below
+    # , otherwise, comment out what's not need but -leave- 'proxy_env' abnd 'no_proxy' defined.
+    proxy_env:
+      http_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
+      https_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
+      no_proxy: localhost.localdomain
+    shade_env:
+      PYTHONWARNINGS: "ignore:Certificate has no, ignore:A true SSLContext object is not available, ignore:Certificate for"
 
     # Flavors used for nested OpenStack roles
     flavors:
