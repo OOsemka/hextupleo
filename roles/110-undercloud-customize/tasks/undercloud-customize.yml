@@ -167,7 +167,6 @@
       - host-memory.yaml
     when: osp == "osp12"
 
-
   - name: create osp12 specific templates
     template:
       src: files/{{ osp }}/node-info.j2
@@ -177,10 +176,10 @@
       group: stack
     when: osp == "osp12"
 
-
-
-  - name: upgrade all packages
+  - name: upgrade all packages ( when 'update_guest_packages' is 'True' )
     yum: name="*" state=latest
+    when: update_guest_packages is defined and update_guest_packages == True
+
   - name: install tools
     yum: name="{{ item }}" state=latest
     with_items:
@@ -194,7 +193,6 @@
       - screen
       - bash-completion
       - mlocate
-
 
 
   - name: display public ip
