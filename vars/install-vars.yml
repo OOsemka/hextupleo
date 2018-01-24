@@ -23,7 +23,7 @@
     proxy_env:
       http_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
       https_proxy: http://User101:MyPassw0rd@proxy.internet.company.com:8080
-      no_proxy: localhost
+      no_proxy: localhost.localdomain
     shade_env:
       PYTHONWARNINGS: "ignore:Certificate has no, ignore:A true SSLContext object is not available, ignore:Certificate for"
 

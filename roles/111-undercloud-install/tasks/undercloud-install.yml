@@ -10,8 +10,6 @@
   tags:
    - undercloud-install
 
-
-
 - name: Ensure undercloud is "{{ state }}"
   shell: "openstack undercloud install"
   become: yes
@@ -68,8 +66,8 @@
     - undercloud-install
 
 
-- name: update dns for ctlplane to {{ dns_server }}
-  shell: "openstack --os-auth-url {{ os_auth_url.stdout }} --os-project-name admin --os-username admin --os-password {{ project_password }} subnet set --dns-nameserver  {{  dns_server }} {{ subnet_uuid.stdout }}"
+- name: update dns for ctlplane to {{ dns_server1 }}
+  shell: "openstack --os-auth-url {{ os_auth_url.stdout }} --os-project-name admin --os-username admin --os-password {{ project_password }} subnet set --dns-nameserver  {{  dns_server1 }} {{ subnet_uuid.stdout }}"
   become: yes
   become_user: stack
   when: install_progress == "undercloud"
