@@ -73,6 +73,13 @@
       owner: stack
       group: stack
 
+  - name: set static hostname to same value as found in undercloud.conf
+    shell: hostnamectl set-hostname --static {{ project_name }}-undercloud.hextupleo.lab
+    become: true
+
+  - name: remove cloud-init to prevent old hostname from coming back in case of a reboot
+    yum: name="cloud-init" state=removed
+
   - name: create rebuild-nodes.sh
     template:
       src: files/rebuild-nodes.j2
@@ -150,8 +157,6 @@
       - wipe-disks.yaml
       - hci-compute.yaml
 
-
-
   - name: copy network-templates
     copy: src=files/{{ osp }}/{{ item }} dest=/home/stack/templates/nic-config/ owner=stack group=stack mode=0644
     with_items:
@@ -193,6 +198,7 @@
       - screen
       - bash-completion
       - mlocate
+    when: update_guest_packages | bool
 
 
   - name: display public ip
