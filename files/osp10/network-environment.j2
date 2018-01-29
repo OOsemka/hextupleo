@@ -39,7 +39,7 @@ parameter_defaults:
   TenantAllocationPools: [{'start': '172.16.2.10', 'end': '172.16.2.200'}]
   # Leave room if the external network is also used for floating IPs
   # !! HEXTUPLEO !! - this pool below has been generated from available ips and it's safe to be used .. you might consider making it smaller and leaving some ips for floating ip
-  ExternalAllocationPools: [{'start': '{{ lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=4') }}', 'end': '{{ lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=5') }}'}]
+  ExternalAllocationPools: [{'start': '{{ ((lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=4') | ipaddr('ip') | ipaddr('int')) + 1) |ipaddr }}', 'end': '{{ lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=5') }}'}]
   # Gateway router for the external network
   # !! HEXTUPLEO !! - this route below has been assigned based on allocated external pool and it's safe to be used
   ExternalInterfaceDefaultRoute: {{ lookup('csvfile', '#{{ available.stdout }} file=files/networks.csv delimiter=, col=3') }}
