@@ -1,0 +1,28 @@
+---
+- name: Create OpenStack Project
+  hosts:
+    - localhost
+  vars:       
+    state: present
+    os_config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}"
+    os_auth:
+      project_name: "{{ lookup('env', 'OS_PROJECT') }}"
+      auth_url: "{{ lookup('env', 'OS_AUTH_URL') }}"
+      username: "{{ lookup('env', 'OS_USERNAME') }}"
+      password: "{{ lookup('env', 'OS_PASSWORD') }}"
+      domain_name: "{{lookup('env', 'OS_PROJECT_DOMAIN_NAME') }}"
+  
+
+
+  roles: 
+    - role: 005-get-os-creds-from-tower
+    - role: 010-keystone-project
+    #- role: 011-keystone-user
+    #- role: 012-keystone-role  
+    #- role: 013-keystone-admin-role
+
+    #- role: 021-openstack-keypair
+    #- role: 023-openstack-secgroup-rules
+    #- role: 025-openstack-quota
+    #- role: 029-project-rc-file
+

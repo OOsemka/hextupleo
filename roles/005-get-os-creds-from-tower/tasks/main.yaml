@@ -1,0 +1,15 @@
+---
+    - name: Load Tower cloud credential config when it is present
+      include_vars: "{{ os_config_file }}"
+      when: os_config_file != ''
+
+    - name: Set necessary variables when Tower cloud credential config is present
+      set_fact:
+        os_auth:
+          auth_url: "{{ clouds.devstack.auth.auth_url }}"
+          username: "{{ clouds.devstack.auth.username }}"
+          password: "{{ clouds.devstack.auth.password }}"
+          project_name: "{{ clouds.devstack.auth.project_name }}"
+          domain_name: "{{ clouds.devstack.auth.domain_name }}"
+      when: os_config_file != ''
+
