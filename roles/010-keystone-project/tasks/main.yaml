@@ -1,6 +1,6 @@
 ---
 -  name: Ensure  projects is "{{ state }}"
-   openstack.cloud.project:
+   os_project:
      auth: "{{ os_auth }}"
      domain_id: "{{ clouds.devstack.auth.domain_name }}"
      state: "{{ state }}"
