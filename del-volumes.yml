@@ -1,0 +1,10 @@
+---
+- name: del-volumes
+  hosts:
+    - localhost
+  vars:
+    state: absent
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 040-cinder-volumes

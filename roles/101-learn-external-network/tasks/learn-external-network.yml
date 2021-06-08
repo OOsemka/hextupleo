@@ -1,0 +1,8 @@
+---
+    
+- name: Learn what is the id of the reserver external network
+  shell: grep ",{{ project_name }}$"  files/networks.csv |  awk -F ","  {'print substr($1,2) '}
+  register: available
+
+
+

@@ -1,0 +1,12 @@
+---
+- name: set-openstack
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 020-openstack-quota
+    - role: 021-openstack-keypair
+    - role: 022-openstack-secgroup

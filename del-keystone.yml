@@ -1,0 +1,11 @@
+---
+- name: set keystone
+  hosts:
+    - localhost
+  vars:
+    state: absent
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 010-keystone-project
+    - role: 011-keystone-user

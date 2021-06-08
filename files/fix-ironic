@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+#####################################
+# Script that prevents ironic from checking ip address at the time of TrieplO introspection
+# This scripts modifies /usr/lib/python2.7/site-packages/ironic_inspector/common/ironic.py if needed and replaces ipmitool with the OpenStack modified version
+# this is needed to allow modified ipmitool function for OpenStack instances
+#####################################
+
+while true; do
+
+ipmitoolwc=`wc -l /usr/bin/ipmitool | awk {'print $1'}`
+ironicscript="/usr/lib/python2.7/site-packages/ironic_inspector/common/ironic.py"
+
+if [ ! -f $ironicscript ] || grep -Fxq "true" $ironicscript ; then
+    echo "File not found!"
+else
+ echo "File has been found .. checking if changes has been applied.."
+ if grep -Fq "true" $ironicscript; then
+        echo "change to python script has been already made"
+ else
+        echo "changing $ironicscript"
+        sudo sed -i '/\ if node\.driver_info\.get/a  \ \ \  if "true" == "true":' ${ironicscript}
+        sudo sed -i "s/\ if node\.driver_info\.get/\ #if node\.driver_info\.get/"  ${ironicscript}
+        sudo systemctl restart openstack-ironic-conductor.service
+        sudo systemctl restart openstack-ironic-inspector.service
+ fi
+
+fi
+
+
+
+if [ $ipmitoolwc != 78 ]; then
+        echo "unmodified ipmitool file detected"
+        sudo mv /usr/bin/ipmitool /usr/bin/ipmitool.orig
+        sudo cp /home/stack/GoodieBag/ipmitool /usr/bin/
+        sudo chown root:root /usr/bin/ipmitool
+        sudo chmod +x /usr/bin/ipmitool
+else
+        echo "ipmitool already modified"
+fi
+
+sleep 30
+done
+

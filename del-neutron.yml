@@ -1,0 +1,14 @@
+---
+- name: del-neutron
+  hosts:
+    - localhost
+  vars:
+    state: absent
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 101-learn-external-network
+    - role: 034-neutron-ports
+    - role: 031-neutron-subnets
+    - role: 030-neutron-networks
+    - role: 033-give-back-extrnal-net

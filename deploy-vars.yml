@@ -1,0 +1,12 @@
+---
+  ceph_count: 0
+  compute_count: 1
+  controller_count: 1
+  hci_count: 0
+  osp: osp11
+  project_name: hextupleO
+  project_password: Passw0rd
+  # options are infra (default) or undercloud
+  install_progress: infra
+  project_availability_zone: nova
+  update_guest_packages: true

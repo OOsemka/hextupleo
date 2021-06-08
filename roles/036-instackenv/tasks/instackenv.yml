@@ -1,0 +1,203 @@
+---
+# This is ugly - there is a better way to generate instackenv.json - it's on to do to clean this up
+########################
+
+# Create instackenv.json file to be used by project - Controller
+###############################################
+
+  - name: make sure old instackenv.json is not there
+    file:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      state: absent
+
+
+  - name: start creating instackenv.json file for the project
+    blockinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      create: yes
+      block: |
+        {
+            "nodes":[
+
+  - name: gather mac addresses for provisioning nic - controllers
+    shell: neutron --os-auth-url "{{ os_auth }}" --os-project-name "{{ project_name }}" --os-username "{{ project_name }}" --os-password "{{ project_password }}" --insecure port-show pxe-controller"{{ item }}" | grep mac_address | awk {'print $4'}
+    register: maccontrollers
+    with_sequence:
+       count="{{ controller_count }}"
+
+
+
+  - name: append controller info
+    blockinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.stdout }}"
+      block: |
+        # controller{{ item.item }}
+                {
+                    "mac":[
+                        "{{ item.stdout }}"
+                    ],
+                    "cpu":"2",
+                    "memory":"4096",
+                    "disk":"40",
+                    "arch":"x86_64",
+                    "pm_type":"pxe_ipmitool",
+                    "name":"controller{{ item.item }}",
+                    "capabilities": "profile:control",
+                    "pm_user":"{{ project_name }}",
+                    "pm_password":"{{ project_password }}",
+                    "pm_addr":"{{ os_auth }}/controller{{ item.item }}"
+
+                },
+    with_items: "{{ maccontrollers.results }}"
+
+# Create instackenv.json file to be used by project - Compute
+###############################################
+
+
+
+  - name: gather mac addresses for provisioning nic - computes
+    shell: neutron --os-auth-url "{{ os_auth }}" --os-project-name "{{ project_name }}" --os-username "{{ project_name }}" --os-password "{{ project_password }}" --insecure port-show pxe-compute"{{ item }}" | grep mac_address | awk {'print $4'}
+    register: maccompute
+    with_sequence:
+       count="{{ compute_count }}"
+
+
+
+  - name: append compute info
+    blockinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.stdout }}"
+      block: |
+        # compute{{ item.item }}
+                {
+                    "mac":[
+                        "{{ item.stdout }}"
+                    ],
+                    "cpu":"2",
+                    "memory":"4096",
+                    "disk":"40",
+                    "arch":"x86_64",
+                    "pm_type":"pxe_ipmitool",
+                    "name":"compute{{ item.item }}",
+                    "capabilities": "profile:compute",
+                    "pm_user":"{{ project_name }}",
+                    "pm_password":"{{ project_password }}",
+                    "pm_addr":"{{ os_auth }}/compute{{ item.item }}"
+
+                },
+    with_items: "{{ maccompute.results }}"
+
+
+# Create instackenv.json file to be used by project - Ceph
+###############################################
+
+
+
+  - name: gather mac addresses for provisioning nic - ceph
+    shell: neutron --os-auth-url "{{ os_auth }}" --os-project-name "{{ project_name }}" --os-username "{{ project_name }}" --os-password "{{ project_password }}" --insecure port-show pxe-ceph"{{ item }}" | grep mac_address | awk {'print $4'}
+    register: macceph
+    with_sequence:
+       count="{{ ceph_count }}"
+
+
+
+  - name: append ceph info
+    blockinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.stdout }}"
+      block: |
+        # ceph{{ item.item }}
+                {
+                    "mac":[
+                        "{{ item.stdout }}"
+                    ],
+                    "cpu":"2",
+                    "memory":"4096",
+                    "disk":"40",
+                    "arch":"x86_64",
+                    "pm_type":"pxe_ipmitool",
+                    "name":"ceph{{ item.item }}",
+                    "capabilities": "profile:ceph-storage",
+                    "pm_user":"{{ project_name }}",
+                    "pm_password":"{{ project_password }}",
+                    "pm_addr":"{{ os_auth }}/ceph{{ item.item }}"
+
+                },
+    with_items: "{{ macceph.results }}"
+
+
+
+
+# Create instackenv.json file to be used by project - hci
+###############################################
+
+
+
+  - name: gather mac addresses for provisioning nic - hci
+    shell: neutron --os-auth-url "{{ os_auth }}" --os-project-name "{{ project_name }}" --os-username "{{ project_name }}" --os-password "{{ project_password }}" --insecure port-show pxe-hci"{{ item }}" | grep mac_address | awk {'print $4'}
+    register: machci
+    with_sequence:
+       count="{{ hci_count }}"
+
+
+
+  - name: append hci info
+    blockinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.stdout }}"
+      block: |
+        # hci{{ item.item }}
+                {
+                    "mac":[
+                        "{{ item.stdout }}"
+                    ],
+                    "cpu":"2",
+                    "memory":"4096",
+                    "disk":"40",
+                    "arch":"x86_64",
+                    "pm_type":"pxe_ipmitool",
+                    "name":"hci{{ item.item }}",
+                    "capabilities": "profile:compute",
+                    "pm_user":"{{ project_name }}",
+                    "pm_password":"{{ project_password }}",
+                    "pm_addr":"{{ os_auth }}/hci{{ item.item }}"
+
+                },
+    with_items: "{{ machci.results }}"
+
+
+# Finish up the instackenv.json file
+##############################
+
+
+
+  - name: remove last line with comma
+    lineinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      state: present
+      regexp: ','
+      line: ''
+
+  - name: finish instackenv.json file
+    blockinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      create: yes
+      insertafter: EOF
+      marker: "# {mark} ANSIBLE MANAGED BLOCK END"
+      block: |
+        # finish
+                }
+            ]
+        }
+
+  - name: remove all the comments
+    lineinfile:
+      path: files/instackenv/{{ project_name }}instackenv.json
+      state: absent
+      regexp: '^#'
+

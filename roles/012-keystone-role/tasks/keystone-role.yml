@@ -1,0 +1,15 @@
+---
+-  name: Ensure user {{ project_name }} is assigned to role _member_
+   os_user_role:
+     auth:
+       auth_url: "{{ os_auth }}"
+       username: "{{ cloud_admin }}"
+       password: "{{ admin_password }}"
+       project_name: "{{ admin_project }}"
+     state: "{{ state }}"
+     user: "{{ project_name }}"
+     role: _member_
+     project: "{{ project_name }}"
+     endpoint_type: admin
+     validate_certs: False
+   tags: role

@@ -1,0 +1,14 @@
+---
+- name: upload keypair for ansible server
+  os_keypair:
+     auth:
+       auth_url: "{{ os_auth }}"
+       username: "{{ project_name }}"
+       password: "{{ project_password }}"
+       project_name: "{{ project_name }}"
+     state: "{{ state }}"
+     name: "{{ keypair }}"
+     validate_certs: False
+     public_key_file: files/id_rsa.pub
+  tags:
+     - keypair

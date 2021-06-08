@@ -1,0 +1,9 @@
+---
+# This is a play created in order to combine all playbooks in order to have it working in CF
+- include: set-varaiables.yml
+- include: set-keystone.yml 
+- include: set-openstack.yml
+- include: set-volumes.yml
+- include: set-neutron.yml
+- include: set-instances.yml
+- include: set-undercloud.yml

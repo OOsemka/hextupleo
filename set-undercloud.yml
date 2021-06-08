@@ -1,0 +1,20 @@
+---
+- name: set-undercloud
+  hosts:
+    - localhost
+  vars:
+    state: present
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 100-undercloud-inventory
+    - role: 101-learn-external-network
+    - role: 102-write-network-env
+- name: customize-undercloud
+  hosts: undercloud
+  tasks:
+  roles:
+    - role: 001-include-vars
+    - role: 110-undercloud-customize
+    - role: 111-undercloud-install
+

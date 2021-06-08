@@ -1,0 +1,20 @@
+---
+-  name: Ensure neutron subnets for {{ project_name }} are {{ state }}
+   os_subnet:
+     auth:
+       auth_url: "{{ os_auth }}"
+       username: "{{ project_name }}"
+       password: "{{ project_password }}"
+       project_name: "{{ project_name }}"
+     state: "{{ state }}"
+     name: "{{ item.value.name }}subnet"
+     network_name: "{{ item.value.name }}"
+     cidr: "{{ item.value.cidr }}"
+     enable_dhcp: "{{ item.value.enable_dhcp }}"
+     no_gateway_ip: "{{ item.value.no_gateway_ip }}"
+     validate_certs: False
+   with_dict: "{{ networks }}"
+   tags: 
+     - subnets
+
+

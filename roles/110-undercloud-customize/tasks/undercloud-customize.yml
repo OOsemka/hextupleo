@@ -1,0 +1,212 @@
+---
+  - name: upload yum repo file to image
+    copy: src=files/{{ osp }}/{{ osp }}.repo dest=/etc/yum.repos.d/
+    become: yes
+  - name: ensure ipmi is at the latest version
+    yum: name=ipmitool state=latest
+    become: yes
+  - name: create user stack and set his permissions
+    shell: useradd stack
+    become: yes
+  - shell: echo "{{ project_password }}" | passwd stack --stdin
+    become: yes
+  - shell: echo "stack ALL=(root) NOPASSWD:ALL" | tee -a /etc/sudoers.d/stack
+    become: yes
+
+  - file:
+      path: /etc/sudoers.d/stack
+      mode: 0440
+  #- shell: chmod 0440 /etc/sudoers.d/stack
+  #  become: yes
+  - lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "PasswordAuthentication no"
+      line: "PasswordAuthentication yes"
+  - service:
+      name: sshd
+      state: restarted
+
+  - name: Allow NTP clients
+    lineinfile:
+      path: /etc/chrony.conf
+      state: present
+      regexp: '^allow 0\.0\.0\.0/0$'
+      line: 'allow 0.0.0.0/0'
+
+  - name: start and enable chronyd service
+    service:
+      name: chronyd
+      enabled: yes
+      state: restarted
+
+  - name: Enable iptables access to local NTP server
+    shell: iptables -A INPUT -p udp --dport 123 -j ACCEPT ; iptables -A OUTPUT -p udp --sport 123 -j ACCEPT
+    ignore_errors: true
+
+  - name: Add NAT rule on for nodes that cannot reach out to DNS/NTP servers directly
+    shell: /usr/sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    ignore_errors: true
+
+  - name: Save NAT rules
+    shell: /sbin/iptables-save > /etc/sysconfig/iptables
+    ignore_errors: true
+
+  - name: Create Stack sub-directories
+    file:
+      path: /home/stack/{{ item }}
+      state: directory
+      mode: 0755
+      owner: stack
+      group: stack
+    with_items:
+       - GoodieBag
+       - images
+       - templates
+       - templates/nic-config
+
+
+  - name: create undercloud.conf
+    template:
+      src: files/{{ osp }}/undercloud-{{ osp }}.j2
+      dest: "/home/stack/undercloud.conf"
+      mode: 0744
+      owner: stack
+      group: stack
+
+  - name: set static hostname to same value as found in undercloud.conf
+    shell: hostnamectl set-hostname --static {{ project_name }}-undercloud.hextupleo.lab
+    become: true
+
+  - name: remove cloud-init to prevent old hostname from coming back in case of a reboot
+    yum: name="cloud-init" state=removed
+
+  - name: create rebuild-nodes.sh
+    template:
+      src: files/rebuild-nodes.j2
+      dest: "/home/stack/GoodieBag/rebuild-nodes.sh"
+      mode: 0744
+      owner: stack
+      group: stack
+
+
+  - name: create deploy.sh
+    template:
+      src: files/{{ osp }}/deploy-{{ osp }}.j2
+      dest: "/home/stack/GoodieBag/deploy.sh"
+      mode: 0744
+      owner: stack
+      group: stack
+
+
+
+  - name: copy instackenv to GoodieBag
+    copy: src=files/instackenv/{{ project_name }}instackenv.json dest=/home/stack/GoodieBag/instackenv.json owner=stack group=stack mode=0744
+
+
+
+
+  - name: copy Goodies to GoodieBag to stack
+    copy: src=files/{{ item }} dest=/home/stack/GoodieBag/ owner=stack group=stack mode=0744
+    with_items:
+      - ipmitool
+
+  - name: rhel7.4 adds requiretty .. removing that option
+    become: yes
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: 'Defaults    requiretty.*'
+      line: '#Defaults    requiretty'
+
+
+  - name: install fix-ironic daemon 1
+    copy: src=files/fix-ironic dest=/usr/bin/ owner=root group=root mode=0755
+    become: yes
+
+  - name: install fix-ironic daemon 2
+    copy: src=files/fix-ironic.service dest=/usr/lib/systemd/system/ owner=root group=root mode=0644
+    become: yes
+
+  - name: issue daemon-reload to pick up config changes
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: fix-ironic
+      enabled: yes
+    become: yes
+
+
+
+  #- name: create network-environment.yaml
+  #  template:
+  #    src: files/{{ osp }}/network-environment.j2
+  #    dest: "/home/stack/templates/network-environment.yaml"
+  #    mode: 0644
+  #    owner: stack
+  #    group: stack
+
+
+  - name: copy network environment file
+    copy: src=files/network-environment/{{ project_name }}-network-environment.yaml dest="/home/stack/templates/network-environment.yaml" owner=stack group=stack mode=0644
+
+  - name: copy storage configuration files
+    copy: src=files/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
+    with_items:
+      - storage-environment.yaml
+      - wipe-disk.sh
+      - wipe-disks.yaml
+      - hci-compute.yaml
+
+  - name: copy network-templates
+    copy: src=files/{{ osp }}/{{ item }} dest=/home/stack/templates/nic-config/ owner=stack group=stack mode=0644
+    with_items:
+      - controller.yaml
+      - compute.yaml
+      - compute-hci.yaml
+      - ceph-storage.yaml
+
+  - name: copy osp12 specific templates
+    copy: src=files/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
+    with_items:
+      - ceph-custom-config.yaml
+      - host-memory.yaml
+    when: osp == "osp12"
+
+  - name: create osp12 specific templates
+    template:
+      src: files/{{ osp }}/node-info.j2
+      dest: "/home/stack/templates/node-info.yaml"
+      mode: 0644
+      owner: stack
+      group: stack
+    when: osp == "osp12"
+
+  - name: upgrade all packages ( when 'update_guest_packages' is 'True' )
+    yum: name="*" state=latest
+    when: update_guest_packages | bool
+
+  - name: install tools
+    yum: name="{{ item }}" state=latest
+    with_items:
+      - libvirt
+      - wget
+      - telnet
+      - xauth
+      - libguestfs-tools
+      - git
+      - vim-enhanced
+      - screen
+      - bash-completion
+      - mlocate
+    when: update_guest_packages | bool
+
+
+  - name: display public ip
+    debug:
+      var: ansible_host
+
+
+  - name: ALL DONE
+    debug:
+      msg: "WE ARE ALL DONE .. Happy hacking!"
+    
