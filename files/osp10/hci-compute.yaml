@@ -1,4 +1,0 @@
-parameter_defaults:
-  NovaComputeExtraConfig:
-    nova::compute::reserved_host_memory: 4096
-    nova::cpu_allocation_ratio: 8

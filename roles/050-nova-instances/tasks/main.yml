@@ -1,3 +1,0 @@
----
-- include: nova-create-instances.yml
-- include: nova-stop-instances.yml

@@ -1,9 +1,0 @@
-[Unit]
-Description=Automated fix for running ipmitool on OpenStack
-
-[Service]
-Type=simple
-ExecStart=/usr/bin/fix-ironic
-
-[Install]
-WantedBy=multi-user.target

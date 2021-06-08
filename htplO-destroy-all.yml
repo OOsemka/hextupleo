@@ -1,8 +1,0 @@
----
-# This is a play to destroy hxtupleO
-- include: set-varaiables.yml
-- include: del-instances.yml
-- include: del-neutron.yml
-- include: del-volumes.yml
-- include: del-openstack.yml
-- include: del-keystone.yml 
