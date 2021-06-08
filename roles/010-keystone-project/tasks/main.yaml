@@ -2,12 +2,12 @@
 -  name: Ensure  projects is "{{ state }}"
    os_project:
      auth: "{{ os_auth }}"
-     domain_id: default
+     domain_id: "{{ clouds.devstack.auth.domain_name }}"
      state: "{{ state }}"
      endpoint_type: admin
      name: "{{ project_name }}"
      enabled: True
-     #validate_certs: False
+     validate_certs: False
    environment:
      OS_IDENTITY_API_VERSION: 3
      OS_PROJECT_DOMAIN_NAME: Default
