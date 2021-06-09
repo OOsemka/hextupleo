@@ -1,0 +1,17 @@
+---
+- name: Learn project ID
+  os_project_info:
+    auth: "{{ os_auth }}"
+    validate_certs: False
+    name: "{{ project_name }}"
+  register: project_info
+
+  tags:
+    - project
+
+- name: Show project info
+  debug:
+     msg: "{{ project_info.openstack_projects }}"
+  tags:
+     - project
+

@@ -1,0 +1,26 @@
+---
+- name: Delete my project
+  hosts:
+    - localhost
+  vars:
+    state: absent
+    os_config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}"
+
+
+  tasks:
+  roles: 
+
+    - role: 005-get-os-creds-from-tower
+    - role: 501-learn-project-info
+    #- role: 506-nova-instance-discover-delete
+    #- role: 507-delete-all-snapshots
+    #- role: 508-delete-all-volumes
+    #- role: 509-neutron-routers-discover-delete
+    #- role: 510-neutron-subnets-discover-delete
+    #- role: 511-neutron-networks-discover-delete
+   
+    - role: 021-openstack-keypair
+    
+    - role: 011-keystone-user
+    - role: 010-keystone-project
+
