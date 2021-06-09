@@ -17,12 +17,12 @@
   roles: 
     - role: 005-get-os-creds-from-tower
     - role: 010-keystone-project
-    #- role: 011-keystone-user
-    #- role: 012-keystone-role  
-    #- role: 013-keystone-admin-role
+    - role: 011-keystone-user
+    - role: 012-keystone-role  
+    - role: 013-keystone-admin-role
 
-    #- role: 021-openstack-keypair
-    #- role: 023-openstack-secgroup-rules
-    #- role: 025-openstack-quota
-    #- role: 029-project-rc-file
+    - role: 021-openstack-keypair
+    - role: 023-openstack-secgroup-rules
+    - role: 025-openstack-quota
+    - role: 029-project-rc-file
 
