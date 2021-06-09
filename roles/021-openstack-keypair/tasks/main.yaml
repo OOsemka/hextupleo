@@ -1,0 +1,19 @@
+---
+- name: upload keypair for ansible server
+  os_keypair:
+    auth:
+      auth_url: "{{ clouds.devstack.auth.auth_url }}"
+      username: "{{ project_name }}"
+      password: "{{ project_password }}"
+      project_name: "{{ project_name }}"
+      domain_id: "{{ clouds.devstack.auth.domain_name }}"
+    state: "{{ state }}"
+    name: hextupleo_pub_key
+    validate_certs: False
+    public_key: "{{ id_rsa_pub }}"
+  environment:
+    OS_IDENTITY_API_VERSION: 3
+    OS_PROJECT_DOMAIN_NAME: Default
+    OS_USER_DOMAIN_NAME: Default
+  tags: keypair
+

@@ -1,0 +1,19 @@
+---
+-  name: Set up quotas
+   os_quota:
+     auth: "{{ os_auth }}"
+     name: "{{ project_name }}"
+     cores: "{{ quota_vcpus }}"
+     ram: "{{ quota_ram }}"
+     instances: "{{ quota_instances }}"
+     port: "{{ quota_ports }}"
+     state: "{{ state }}"
+     validate_certs: False
+   environment:
+     OS_IDENTITY_API_VERSION: 3
+     OS_PROJECT_DOMAIN_NAME: Default
+     OS_USER_DOMAIN_NAME: Default
+
+   tags:
+    - quota
+

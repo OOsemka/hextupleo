@@ -1,15 +1,15 @@
 ---
--  name: Ensure  projects is "{{ state }}"
-   os_project:
+-  name: Ensure user is "{{ state }}"
+   os_user:
      auth: "{{ os_auth }}"
      domain_id: "{{ clouds.devstack.auth.domain_name }}"
      state: "{{ state }}"
      name: "{{ project_name }}"
-     enabled: True
+     password: "{{ project_password }}"
      validate_certs: False
    environment:
      OS_IDENTITY_API_VERSION: 3
      OS_PROJECT_DOMAIN_NAME: Default
      OS_USER_DOMAIN_NAME: Default
-   tags: project
+   tags: user
 
