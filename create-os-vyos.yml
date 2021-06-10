@@ -1,0 +1,13 @@
+---
+- name: Create OpenStack VNFs - VYOS
+  hosts:
+    - localhost
+  vars: 
+    state: present 
+    os_config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}" 
+  
+
+  tasks:
+  roles: 
+    - role: 005-get-os-creds-from-tower
+    - role: 053-vyos

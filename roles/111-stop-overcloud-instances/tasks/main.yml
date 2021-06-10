@@ -1,0 +1,23 @@
+---
+- name: Learn overcloud instances in the project
+  os_server_info:
+    auth: "{{ os_auth_tenant }}"
+    validate_certs: False
+    server: overcloud_*
+  register: instances
+  tags:
+    - instances
+
+
+
+
+-  name: Stop overcloud instances 
+   os_server_action:
+      auth: "{{ os_auth_tenant }}"
+      action: stop
+      server: "{{ item.id }}"
+      validate_certs: False
+   with_items:
+     - "{{ instances.openstack_servers }}"
+
+

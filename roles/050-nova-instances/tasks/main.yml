@@ -1,0 +1,38 @@
+---
+- name: deploy instances
+  os_server:
+     auth: "{{ os_auth_tenant }}"
+     state: "{{ state }}"
+     name: "{{ item.name }}"
+     image: "{{ item.image }}"
+     key_name: hextupleo_pub_key
+     flavor: "{{ item.flavor }}"
+     auto_ip: no
+     validate_certs: False
+     nics:
+       - net-name: "{{ item.net_name1 }}"
+       - net-name: "{{ item.net_name2 }}"
+       - net-name: "{{ item.net_name3 }}"
+       - net-name: "{{ item.net_name4 }}"
+       - net-name: "{{ item.net_name5 }}"
+       - net-name: "{{ item.net_name6 }}"
+       - net-name: "{{ item.net_name7 }}"
+       - net-name: "{{ item.net_name8 }}"
+  with_items: 
+    - "{{ instances }}"
+  ignore_errors: True
+  register: instances_deployed
+  tags:
+     - instances
+
+
+- name: Stop pxeboot instances
+  os_server_action:
+     auth: "{{ os_auth_tenant }}"
+     action: stop
+     server: "{{ item.name }}"
+     validate_certs: False
+  with_items:
+    - "{{ instances }}"
+  when: item.image == "pxeboot"
+

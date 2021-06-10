@@ -1,0 +1,15 @@
+---
+-  name: Ensure neutron networks are "{{ state }}"
+   os_network:
+     auth: "{{ os_auth_tenant }}"
+     state: "{{ state }}"
+     name: "{{ item.name }}"
+     port_security_enabled: False
+     mtu: "{{ item.mtu }}"
+     validate_certs: False
+   with_items:
+     - "{{ networks }}"
+   #async: 7200
+   #poll: 0
+   tags:
+     - networks

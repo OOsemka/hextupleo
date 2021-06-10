@@ -1,15 +1,26 @@
 ---
-    - name: Load Tower cloud credential config when it is present
+    - name: Load Tower cloud credential config 
       include_vars: "{{ os_config_file }}"
       when: os_config_file != ''
 
-    - name: Set necessary variables when Tower cloud credential config is present
+    - name: Set Openstack Tower cloud credentials (admin)
       set_fact:
         os_auth:
           auth_url: "{{ clouds.devstack.auth.auth_url }}"
           username: "{{ clouds.devstack.auth.username }}"
           password: "{{ clouds.devstack.auth.password }}"
           project_name: "{{ clouds.devstack.auth.project_name }}"
+          domain_id: "{{ clouds.devstack.auth.domain_name }}"
+      when: os_config_file != ''
+
+
+    - name: Set OpenStack Tower cloud credentials (tenant)
+      set_fact:
+        os_auth_tenant:
+          auth_url: "{{ clouds.devstack.auth.auth_url }}"
+          username: "{{ project_name }}"
+          password: "{{ project_password }}"
+          project_name: "{{ project_name }}"
           domain_id: "{{ clouds.devstack.auth.domain_name }}"
       when: os_config_file != ''
 

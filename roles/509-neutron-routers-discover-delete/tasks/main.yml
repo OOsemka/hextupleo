@@ -1,0 +1,16 @@
+---
+
+  - name: cleanup ports attached to routers
+    shell: "for i in $(openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure router list | grep -v Status | awk '{print $2}'); do for j in $(openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure router show $i --format yaml | awk '/port_id/ { print $2 }');do openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure router remove port $i $j ; done ; done"
+    environment:
+      PYTHONPATH: "/opt/rh/rh-python36/root/lib/python3.6/site-packages/"
+    when: state == "absent"
+
+
+
+  - name: cleanup routers
+    shell: "for i in $(openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure router list | grep -v Status | awk '{print $2}'); do openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure router delete $i ; done"
+    environment:
+      PYTHONPATH: "/opt/rh/rh-python36/root/lib/python3.6/site-packages/"
+    when: state == "absent"
+

@@ -1,0 +1,34 @@
+---
+- name: Learn all the instances in the project
+  os_server_info:
+    auth: "{{ os_auth_tenant }}"
+    validate_certs: False
+    filters:
+      project_id: "{{ item.id }}"
+  with_items:
+    - "{{ project_info.openstack_projects }}"
+  register: project_instances
+  
+
+  tags:
+    - instances
+
+- name: Show openstack instances
+  debug:
+     msg: "{{ project_instances.results.0.openstack_servers }}"
+  tags:
+     - instances
+
+
+- name: Ensure openstack instances are "{{ state }}"
+  os_server:
+    auth: "{{ os_auth_tenant }}"
+    state: "{{ state }}"
+    name: "{{ item.id }}"
+    validate_certs: False
+  with_items:
+    - "{{ project_instances.results.0.openstack_servers }}"
+
+  tags:
+    - instances
+

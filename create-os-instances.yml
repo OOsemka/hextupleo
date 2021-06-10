@@ -1,0 +1,15 @@
+---
+- name: Create OpenStack Instances
+  hosts:
+    - localhost
+  vars: 
+    state: present  
+    os_config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}"
+  
+
+  tasks:
+  roles: 
+    - role: 005-get-os-creds-from-tower
+    - role: 050-nova-instances
+    - role: 051-cinder-volumes
+    - role: 052-virtual-ipmi

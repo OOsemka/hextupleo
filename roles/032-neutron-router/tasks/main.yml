@@ -1,0 +1,15 @@
+---
+-  name: Create a router and attached SNAT networks
+   os_router:
+     auth: "{{ os_auth_tenant }}"
+     state: "{{ state }}"
+     name: "{{ project_name }}_router"
+     network: "{{ ext_network }}"
+     interfaces: "{{ item.name }}subnet"
+     validate_certs: False
+   with_items:
+     - "{{ networks }}"
+   when: item.snat == "True"
+
+   tags:
+     - router

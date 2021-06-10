@@ -1,0 +1,37 @@
+---
+-  name: Create cinder volumes
+   os_volume:
+      auth: "{{ os_auth_tenant }}"
+      state: "{{ state }}"
+      size: "{{ item.extra_volume_size }}"
+      display_name: "{{ item.name }}_volume"
+      validate_certs: False
+   with_items:
+     - "{{ instances }}"
+   when: item.extra_volume_size != "0"
+
+   tags:
+     - volumes
+
+-  name: Stop instances that need volumes
+   os_server_action:
+      auth: "{{ os_auth_tenant }}"
+      action: stop
+      server: "{{ item.name }}"
+      validate_certs: False
+   with_items:
+     - "{{ instances }}"
+   when: item.extra_volume_size != "0"
+
+
+-  name: Attach volumes to instances
+   os_server_volume:
+      auth: "{{ os_auth_tenant }}"
+      server: "{{ item.name }}"
+      volume: "{{ item.name }}_volume"
+      state: "{{ state }}"
+      validate_certs: False
+   with_items:
+     - "{{ instances }}"
+   when: item.extra_volume_size != "0"
+

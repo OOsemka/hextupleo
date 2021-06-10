@@ -1,0 +1,33 @@
+---
+- name: deploy vyos instances
+  os_server:
+     auth:
+       auth_url: "{{ os_auth }}"
+       username: "{{ project_name }}"
+       password: "{{ project_password }}"
+       project_name: "{{ project_name }}"
+       domain_id: "{{ domain_id }}"
+     state: "{{ state }}"
+     name: "{{ item.name }}"
+     image: "{{ item.image }}"
+     key_name: hextupleo_pub_key
+     flavor: "{{ item.flavor }}"
+     config_drive: True
+     userdata: "{{ item.my_userdata }}"
+     auto_ip: no
+     validate_certs: False
+     nics:
+       - net-name: "{{ item.net_name1 }}"
+       - net-name: "{{ item.net_name2 }}"
+       - net-name: "{{ item.net_name3 }}"
+       - net-name: "{{ item.net_name4 }}"
+       - net-name: "{{ item.net_name5 }}"
+       - net-name: "{{ item.net_name6 }}"
+       - net-name: "{{ item.net_name7 }}"
+       - net-name: "{{ item.net_name8 }}"
+  with_items: 
+    - "{{ instances_vyos }}"
+  ignore_errors: True
+  register: instances_deployed
+  tags:
+     - vyos

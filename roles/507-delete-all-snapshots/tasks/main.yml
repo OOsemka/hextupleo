@@ -1,0 +1,7 @@
+---
+
+  - name: cleanup snapshots
+    shell: "for i in $(openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure image list --private | awk '/active/ {print $2}'); do openstack --os-auth-url {{ clouds.devstack.auth.auth_url }} --os-user-domain-name {{ clouds.devstack.auth.domain_name }} --os-project-domain-name {{ clouds.devstack.auth.domain_name }} --os-default-domain {{ clouds.devstack.auth.domain_name }} --os-project-name {{ project_name }} --os-username {{ project_name }} --os-password {{ project_password }} --insecure image delete $i ; done"
+    environment:
+      PYTHONPATH: "/opt/rh/rh-python36/root/lib/python3.6/site-packages/"
+    when: state == "absent"
