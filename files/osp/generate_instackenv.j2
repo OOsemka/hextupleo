@@ -1,0 +1,35 @@
+---
+- name: Create OpenStack Instances
+  hosts:
+    - localhost
+  vars:
+    ppassword: "{{ project_password }}"
+    pname: "{{ project_name }}"
+
+  tasks:
+    - name: Learn overcloud instances in the project
+      os_server_info:
+        auth:
+          auth_url: "{{ clouds.devstack.auth.auth_url }}"
+          username: "{{ project_name }}"
+          password: "{{ project_password }}"
+          project_name: "{{ project_name }}"
+          domain_id: "{{ clouds.devstack.auth.domain_name }}"
+        validate_certs: False
+        server: overcloud_*
+      register: overcloud_instances
+      tags:
+        - instances
+    - name: Show openstack ipmi instances
+      debug:
+         msg:{%- raw -%} "{{ overcloud_instances.openstack_servers }}"
+      tags:
+       - instances
+
+    - name: create instackenv template
+      template:
+        src: "instackenv.j2"
+        dest: "instackenv.yaml"
+        mode: 0644
+{% endraw %}
+

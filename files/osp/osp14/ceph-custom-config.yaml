@@ -1,0 +1,14 @@
+parameter_defaults:
+  CephConfigOverrides:
+    journal_size: 5120
+    max_open_files: 131072
+    osd_pool_default_size: 1
+    osd_pool_default_min_size: 1
+    osd_pool_default_pg_num: 16
+    osd_pool_default_pgp_num: 16
+  CephAnsibleDisksConfig:
+    osd_scenario: collocated
+    dmcrypt: False
+    devices:
+      - /dev/vdb
+  CephPoolDefaultPgNum: 16

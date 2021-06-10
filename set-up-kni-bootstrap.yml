@@ -1,0 +1,25 @@
+---
+- name: Gather inventory for bootstrap host
+  hosts:
+    - localhost
+  vars:
+    os_config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}"
+  
+
+  tasks:
+  roles: 
+    - role: 005-get-os-creds-from-tower
+    - role: 110-os-instance-inventory
+
+
+- name: Set up kni bootstrap
+  hosts: os_instance
+  become: true
+
+  vars:
+    os_config_file: "{{ lookup('env', 'OS_CLIENT_CONFIG_FILE') }}"  
+
+  tasks:
+  roles:
+    - role: 005-get-os-creds-from-tower
+    - role: 220-customize-kni

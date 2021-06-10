@@ -1,0 +1,50 @@
+nodes:
+{% for servers in overcloud_instances.openstack_servers %}
+  - mac:
+{% if 'provisioning0' in servers.addresses %}
+      - "{{servers.addresses.provisioning0.0['OS-EXT-IPS-MAC:mac_addr']}}"
+{% if 'controller' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:control,boot_option:local"
+{% endif %}
+{% if 'compute' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:compute,boot_option:local"
+{% endif %}
+{% if 'ceph' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:ceph-storage,boot_option:local"
+{% endif %}
+{% if 'hci' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:compute,boot_option:local"
+{% endif %}
+{% endif %}
+{% if 'provisioning1' in servers.addresses %}
+      - "{{servers.addresses.provisioning1.0['OS-EXT-IPS-MAC:mac_addr']}}"
+{% if 'edge1_compute' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:compute-leaf1,boot_option:local"
+{% endif %}
+{% if 'edge1_ceph' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:ceph-storage-leaf1,boot_option:local"
+{% endif %}
+{% if 'edge1_hci' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:compute-leaf1,boot_option:local"
+{% endif %}
+{% endif %}
+{% if 'provisioning2' in servers.addresses %}
+      - "{{servers.addresses.provisioning2.0['OS-EXT-IPS-MAC:mac_addr']}}"
+{% if 'edge2_compute' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:compute-leaf2,boot_option:local"
+{% endif %}
+{% if 'edge2_ceph' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:ceph-storage-leaf2,boot_option:local"
+{% endif %}
+{% if 'edge2_hci' in servers.name %}
+    capabilities: "node:{{servers.name}},profile:compute-leaf2,boot_option:local"
+{% endif %}
+{% endif %}
+    name: "{{servers.name}}"
+    arch: "x86_64"
+    pm_addr: "X.X.X.X"
+    pm_user: "{{pname}}"
+    pm_password: "{{ppassword}}"
+    pm_type: ipmi
+{% endfor %}
+

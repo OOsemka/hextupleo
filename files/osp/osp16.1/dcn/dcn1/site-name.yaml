@@ -1,0 +1,17 @@
+parameter_defaults:
+    NovaComputeAvailabilityZone: dcn1
+    NovaCrossAZAttach: false
+    CinderStorageAvailabilityZone: dcn1
+    CinderVolumeCluster: dcn1
+
+    ComputeLeaf1ExtraConfig:
+      #nova::compute::libvirt::vncserver_listen: "%{hiera('internal_api_leaf1')}"
+      #nova::compute::vncserver_proxyclient_address: "%{hiera('internal_api_leaf1')}"
+      #neutron::agents::ml2::ovs::local_ip: "%{hiera('tenant_leaf1')}"
+      #cold_migration_ssh_inbound_addr: "%{hiera('internal_api_leaf1')}"
+      #live_migration_ssh_inbound_addr: "%{hiera('internal_api_leaf1'}"
+      #nova::migration::libvirt::live_migration_inbound_addr: "%{hiera('internal_api_leaf1')}"
+      #nova::my_ip: "%{hiera('internal_api_leaf1')}"
+      #tripleo::profile::base::database::mysql::client::mysql_client_bind_address: "%{hiera('internal_api_leaf1')}"
+      neutron::agents::dhcp::availability_zone: 'dcn1'
+

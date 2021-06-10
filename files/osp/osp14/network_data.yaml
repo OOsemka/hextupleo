@@ -1,0 +1,26 @@
+- name : InternalApi
+  vip: true
+  name_lower: internal_api
+  ip_subnet: '10.20.0.0/24'
+  allocation_pools: [{'start': '10.20.0.20', 'end': '10.20.0.200'}]
+- name : Storage
+  vip: true
+  name_lower: storage
+  ip_subnet: '10.40.0.0/24'
+  allocation_pools: [{'start': '10.40.0.20', 'end': '10.40.0.200'}]
+- name : StorageMgmt
+  vip: true
+  name_lower: storage_mgmt
+  ip_subnet: '10.50.0.0/24'
+  allocation_pools: [{'start': '10.50.0.20', 'end': '10.50.0.200'}]
+- name : Tenant
+  vip: false
+  name_lower: tenant
+  ip_subnet: '10.30.0.0/24'
+  allocation_pools: [{'start': '172.30.0.20', 'end': '172.30.0.200'}]
+- name : External
+  vip: true
+  name_lower: external
+  ip_subnet: '10.1.0.0/24'
+  allocation_pools: [{'start': '10.1.0.90', 'end': '10.1.0.99'}]
+  gateway_ip: 10.1.0.11

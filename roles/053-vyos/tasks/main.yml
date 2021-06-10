@@ -1,12 +1,7 @@
 ---
 - name: deploy vyos instances
   os_server:
-     auth:
-       auth_url: "{{ os_auth }}"
-       username: "{{ project_name }}"
-       password: "{{ project_password }}"
-       project_name: "{{ project_name }}"
-       domain_id: "{{ domain_id }}"
+     auth: "{{ os_auth_tenant }}"
      state: "{{ state }}"
      name: "{{ item.name }}"
      image: "{{ item.image }}"

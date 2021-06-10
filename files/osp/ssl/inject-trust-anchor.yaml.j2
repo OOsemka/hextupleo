@@ -1,0 +1,6 @@
+parameter_defaults:
+  SSLRootCertificate: |
+{{ root_ca_cert.stdout }}
+
+resource_registry:
+  OS::TripleO::NodeTLSCAData: {{ path_value }}/puppet/extraconfig/tls/ca-inject.yaml

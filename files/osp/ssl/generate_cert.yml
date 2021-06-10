@@ -1,0 +1,353 @@
+---
+#  generate_cert.yml
+#
+#  Author: Dave Costakos <david.costakos@redhat.com>
+#
+#  Description: Install OSPd 8-10 in a Pre-setup VM
+# 
+#  Getting Started with This
+#  1. Setup your VM as defined in the OSP 10 Director Install Guide Prerequisites
+#     ref: https://access.redhat.com/documentation/en/red-hat-openstack-platform/10/single/director-installation-and-usage/#sect-Undercloud_Requirements
+#     NB: VM should have 2 configured network interfaces: 1 External/Routable and 1 Provisioning Network
+#         stack user should exist and have full sudo rights
+# 
+#  2. Setup your ansible.cfg and inventory file
+#  
+#  3. Edit the vars section as appropriate for your environment
+#
+#  4. Setup SSH public key access as the stack user from your ansible host
+#
+#  5. run the playbook 
+#-------------------------------------------------------------------------------
+#   Copyright 2017 Dave Costakos <david.costakos@redhat.com>
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#-------------------------------------------------------------------------------
+- name: Generate Self Signing CA and Cert for Overcloud Deployment
+  hosts: ospd_hosts
+  become: true
+  vars:
+    overcloud_vip: 10.9.65.220
+    undercloud_public_ip: 10.9.65.115
+    undercloud_prov_ip: 172.16.0.11
+    cert_subject_base: "/C=US/ST=North Carolina/L=Apex/O=Red Hat/OU=Tiger Team"
+    # Should the enable-tls and inject-trush-anchor files be generated with
+    # relative paths for users who copy the whole templates director
+    # or with absolute paths for those who don't.
+    osp_config_relative_paths: true
+    chdir: /home/stack/ssl
+    rebuild: false
+  tasks:
+    - name: setup - create {{ chdir }} directory
+      file:
+        dest: "{{ chdir }}"
+        state: directory
+        owner: stack
+        group: stack
+        mode: 0700
+
+    - name: generate paths for enable-tls and inject-trust-anchor files
+      set_fact:
+        path_value: "/usr/share/openstack-tripleo-heat-templates"
+      when: osp_config_relative_paths
+
+    - name: generate direct path names for enable-tls and inject-trust-anchor if needed
+      set_fact:
+        path_value: "/usr/share/openstack-tripleo-heat-templates"
+      when: not osp_config_relative_paths
+
+    - name: setup - recreate the index.txt file if you are trying stuff out and need to rebuild
+      file:
+        path: /etc/pki/CA/index.txt
+        state: absent
+      when: rebuild
+
+    - name: setup - stat the /etc/pki/CA/index.txt
+      stat:
+        path: /etc/pki/CA/index.txt
+      register: ca_index
+
+    - name: setup - touch /etc/pki/CA/index.txt if it does not already exist
+      file:
+        dest: /etc/pki/CA/index.txt
+        state: touch
+        owner: root
+        group: root
+        mode: 0400
+      when: ca_index.stat.exists == False
+
+    - name: setup - create the /etc/pki/CA/serial file
+      shell: date +'%s' > /etc/pki/CA/serial
+
+    - name: setup - check if ca.key.pem file exists
+      stat:
+        path: "{{ chdir }}/ca.key.pem"
+      register: ca_key_exists
+
+    - name: setup - check if ca.crt.pem file exists
+      stat:
+        path: "{{ chdir }}/ca.crt.pem"
+      register: ca_crt_exists
+
+    - name: setup - debug ca.crt.pem exists
+      debug:
+        msg: ca_crt_exists {{ ca_crt_exists }}
+
+    - name: setup - debug ca.key.pem exists
+      debug: 
+        msg: ca_key_exists {{ ca_key_exists }}
+
+    - name: setup - generate ca - create key
+      become: false
+      shell: openssl genrsa -out {{ chdir }}/ca.key.pem 4096
+      args:
+        chdir: "{{ chdir }}"
+      when: ca_key_exists.stat.exists == False
+
+    - name: setup - create ca - create cert
+      become: false
+      shell: openssl req -key {{ chdir }}/ca.key.pem -new -x509 -days 73000 -extensions v3_ca -out {{ chdir }}/ca.crt.pem -subj '{{ cert_subject_base }}/CN={{ undercloud_public_ip }}/CN={{ undercloud_prov_ip }}'
+      args:
+        chdir: "{{ chdir }}"
+      when: ca_crt_exists.stat.exists == False
+
+    - name: setup - copy to local trust anchor 
+      copy:
+        src: "{{ chdir }}/ca.crt.pem"
+        dest: /etc/pki/ca-trust/source/anchors/
+        remote_src: true
+
+    - name: setup - update ca trust
+      shell: update-ca-trust extract
+
+    - name: setup - variablize ca cert
+      shell: sed -e 's/^/    /' < {{ chdir }}/ca.crt.pem
+      args:
+        chdir: "{{ chdir }}"
+        warn: false
+      register: root_ca_cert
+
+    - name: setup - create inject-trust-anchor.yaml
+      template:
+        src: inject-trust-anchor.yaml.j2
+        dest: "{{ chdir }}/inject-trust-anchor.yaml"
+        mode: 0644
+        owner: stack
+        group: stack
+
+    - name: generate ssl undercloud - copy openssl.cnf
+      copy:
+        src: /etc/pki/tls/openssl.cnf
+        dest: "{{ chdir }}/openssl.cnf"
+        owner: stack
+        group: stack
+        mode: 0644
+        remote_src: true
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - openssl.cnf file updates section
+      ini_file:
+        dest: "{{ chdir }}/openssl.cnf"
+        option: "{{ item.key }}"
+        value: "{{ item.value }}"
+        section: "{{ item.section }}"
+        backup: no
+      with_items:
+        - { key: 'req_extensions', section: 'req', value: 'v3_req' }
+        - { key: basicConstraints, value: "CA:FALSE", section: 'v3_req' }
+        - { key: keyUsage, value: "nonRepudiation, digitalSignature, keyEncipherment", section: v3_req }
+        - { key: subjectAltName, value: "@alt_names", section: v3_req }
+        - { key: "IP.1", value: "{{ undercloud_public_ip }}", section: alt_names }
+        - { key: "IP.2", value: "{{ undercloud_prov_ip }}", section: alt_names }
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - create undercloud key
+      become: false
+      shell: openssl genrsa -out undercloud.key.pem 2048
+      args:
+        chdir: "{{ chdir }}"
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - create undercloud certificate signing request
+      become: false
+      shell: openssl req -config {{ chdir }}/openssl.cnf -key undercloud.key.pem -new -out undercloud.csr.pem -subj '{{ cert_subject_base }}/CN={{ undercloud_public_ip }}/CN={{ undercloud_prov_ip }}'
+      args:
+        chdir: "{{ chdir }}"
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - create undercloud certificate
+      shell: openssl ca -config {{ chdir }}/openssl.cnf -extensions v3_req -days 3650 -in undercloud.csr.pem -out undercloud.crt.pem -cert ca.crt.pem -keyfile ca.key.pem -batch
+      args:
+        chdir: "{{ chdir }}"
+      register: cert_create
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - check - test validation of undercloud.crt.pem file
+      shell: openssl verify -CAfile ca.crt.pem undercloud.crt.pem
+      become: false
+      args:
+        chdir: "{{ chdir }}"
+      register: verify_result
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - debug verify result for undercloud certificate
+      debug:
+        msg: "{{ verify_result }}"
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - create undercloud.pem file
+      shell: cat {{ chdir }}/undercloud.key.pem {{ chdir }}/undercloud.crt.pem > {{ chdir }}/undercloud.pem
+      become: false
+      args:
+        chdir: "{{ chdir }}"
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - make /etc/pki/instack-certs
+      file:
+        path: /etc/pki/instack-certs
+        state: directory
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - copy undercloud.pem to /etc/pki/instack-certs
+      copy:
+        src: "{{ chdir }}/undercloud.pem"
+        dest: /etc/pki/instack-certs/undercloud.pem
+        remote_src: true
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - semanage on /etc/pki/instack-certs
+      shell: semanage fcontext -a -t etc_t "/etc/pki/instack-certs(/.*)?"
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl undercloud - restorecon on /etc/pki/instack-certs
+      shell: restorecon -R /etc/pki/instack-certs
+      tags:
+        - undercloud-certs
+
+    - name: generate ssl overcloud - copy openssl.cnf
+      copy:
+        src: /etc/pki/tls/openssl.cnf
+        dest: "{{ chdir }}/openssl.cnf"
+        owner: stack
+        group: stack
+        mode: 0644
+        remote_src: true
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - openssl.cnf file updates section 
+      ini_file:
+        dest: "{{ chdir }}/openssl.cnf"
+        option: "{{ item.key }}"
+        value: "{{ item.value }}"
+        section: "{{ item.section }}"
+        backup: no
+      with_items:
+        - { key: 'req_extensions', section: 'req', value: 'v3_req' }
+        - { key: basicConstraints, value: "CA:FALSE", section: 'v3_req' }
+        - { key: keyUsage, value: "nonRepudiation, digitalSignature, keyEncipherment", section: v3_req }
+        - { key: subjectAltName, value: "@alt_names", section: v3_req }
+        - { key: "IP.1", value: "{{ overcloud_vip }}", section: alt_names }
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - create server key
+      become: false
+      shell: openssl genrsa -out overcloud.key.pem 2048
+      args:
+        chdir: "{{ chdir }}"
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - create certificate signing request
+      become: false
+      shell: openssl req -config {{ chdir }}/openssl.cnf -key overcloud.key.pem -new -out overcloud.csr.pem -subj '{{ cert_subject_base }}/CN={{ overcloud_vip }}'
+      args:
+        chdir: "{{ chdir }}"
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - create server cert
+      shell: openssl ca -config {{ chdir }}/openssl.cnf -extensions v3_req -days 3650 -in overcloud.csr.pem -out overcloud.crt.pem -cert ca.crt.pem -keyfile ca.key.pem -batch
+      args:
+        chdir: "{{ chdir }}"
+      register: cert_create
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - variablize server ssl key
+      shell: sed -e 's/^/    /' < {{ chdir }}/overcloud.key.pem
+      args:
+        chdir: "{{ chdir }}"
+        warn: false
+      register: ssl_key
+      tags:
+        - overcloud-certs
+
+    # sed magic + space padding
+    - name: generate ssl overcloud - variablize server ssl cert
+      shell: sed -n -e '/-----BEGIN CERTIFICATE-----/,$p' < {{ chdir }}/overcloud.crt.pem | sed -e 's/^/    /'
+      args:
+        chdir: "{{ chdir }}"
+        warn: false
+      register: ssl_cert
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - create enable-tls.yaml
+      template:
+        src: enable-tls.yaml.j2
+        dest: "{{ chdir }}/enable-tls.yaml"
+        mode: 0644
+        owner: stack
+        group: stack
+      tags: overcloud-certs
+
+    - name: generate ssl overcloud - check - testing validation of the cert
+      shell: openssl verify -CAfile ca.crt.pem overcloud.crt.pem
+      become: false
+      args:
+        chdir: "{{ chdir }}"
+      register: verify_result
+      tags:
+        - overcloud-certs
+
+    - name: generate ssl overcloud - debug verify result (info only)
+      debug:
+        msg: "{{ verify_result }}"
+      tags:
+        - overcloud-certs
+
+    - name: DEBUG OSP9
+      debug:
+        msg: NOTE if you are using previous to OSP10, usually OSP9 and previous ad IP or DNS names as the EndpointMap option in enable-tls.  You must add these manually if you are using OSP9 or previous.
+      tags:
+        - overcloud-certs 
+
+    - name: final note
+      debug:
+        msg: NOTE please copy ~/ssl/enable-tls.yaml and ~/ssl/inject-trust-anchor.yaml to your ~/templates/environments directory and include them in your deployment command 
+      tags:
+        - overcloud-certs
+

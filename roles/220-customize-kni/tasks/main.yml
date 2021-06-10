@@ -1,0 +1,134 @@
+---
+  - name: create user kni and set his permissions
+    user: 
+      name: kni
+    become: yes
+  - shell: echo "{{ project_password }}" | passwd kni --stdin
+    become: yes
+  - shell: echo "kni ALL=(root) NOPASSWD:ALL" | tee -a /etc/sudoers.d/kni
+    become: yes
+
+  - file:
+      path: /etc/sudoers.d/kni
+      mode: 0440
+
+
+  - lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "PasswordAuthentication no"
+      line: "PasswordAuthentication yes"
+  - service:
+      name: sshd
+      state: restarted
+
+
+
+  - name: Create Stack sub-directories
+    file:
+      path: /home/kni/{{ item }}
+      state: directory
+      mode: 0755
+      owner: kni
+      group: kni
+    with_items:
+       - GoodieBag
+
+
+  - name: Generating openstack rc file for your convenience
+    shell: |
+       cat <<EOF > /home/kni/GoodieBag/{{ project_name }}rc
+       for key in \$( set | awk '{FS="="}  /^OS_/ {print \$1}' ); do unset \$key ; done
+       export NOVA_VERSION=1.1
+       export COMPUTE_API_VERSION=1.1
+       export OS_USERNAME={{ project_name }}
+       export OS_PROJECT_NAME={{ project_name }}
+       export OS_USER_DOMAIN_NAME={{ clouds.devstack.auth.domain_name }}
+       export OS_PROJECT_DOMAIN_NAME={{ clouds.devstack.auth.domain_name }}
+       export OS_NO_CACHE=True
+       export OS_CLOUDNAME={{ project_name }}
+       export PYTHONWARNINGS='ignore:Certificate has no, ignore:A true SSLContext object is not available'
+       export OS_AUTH_TYPE=password
+       export OS_PASSWORD={{ project_password }}
+       export OS_AUTH_URL={{ os_auth }}
+       export OS_IDENTITY_API_VERSION=3
+       export OS_COMPUTE_API_VERSION=2.latest
+       export OS_IMAGE_API_VERSION=2
+       export OS_VOLUME_API_VERSION=3
+       export OS_REGION_NAME=regionOne
+       # Add OS_CLOUDNAME to PS1
+       if [ -z "\${CLOUDPROMPT_ENABLED:-}" ]; then
+           export PS1=\${PS1:-""}
+           export PS1=\\\${OS_CLOUDNAME:+"(\\\$OS_CLOUDNAME)"}\\ \$PS1
+           export CLOUDPROMPT_ENABLED=1
+       fi
+       EOF
+    become: yes
+
+
+     
+  - name: create playbook for generating install-config
+    template:
+      src: files/kni/generate-configs.j2
+      dest: "/home/kni/GoodieBag/generate-configs.yml"
+      mode: 0744
+      owner: kni
+      group: kni
+  
+
+
+  - name: copy Goodies to GoodieBag for kni
+    copy: src=files/kni/{{ item }} dest=/home/kni/GoodieBag/ owner=kni group=kni mode=0744
+    with_items:
+      - install-config.j2
+      - kni.dns.j2 
+      - hosts.j2
+      - resolv.conf.upstream
+      - resolv.conf
+
+  - name: rhel7.4 adds requiretty .. removing that option
+    become: yes
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: 'Defaults    requiretty.*'
+      line: '#Defaults    requiretty'
+
+
+
+  - name: Enable and start service chrony
+    service:
+      name: chronyd
+      enabled: yes
+      state: started
+
+  - name: Destroy the default virt-net
+    shell: |
+       virsh net-destroy default
+       virsh net-autostart --network default --disable
+    become: yes
+    ignore_errors: true
+
+  - name: rhel8 is being weird - redoing PasswordAuthentication yes
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "PasswordAuthentication no"
+      line: "PasswordAuthentication yes"
+
+  - name: rhel8 is being weird - restarting sshd
+    service:
+      name: sshd
+      state: restarted
+
+
+  - name: display public ip
+    debug:
+      var: ansible_host
+
+
+  - name: ALL DONE
+    debug:
+      msg: "WE ARE ALL DONE .. Happy hacking!"
+
+
+
+

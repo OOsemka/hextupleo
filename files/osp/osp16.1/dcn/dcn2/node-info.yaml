@@ -1,0 +1,10 @@
+parameter_defaults:
+  ControllerCount: 0
+  ComputeCount: 0
+  OvercloudControllerFlavor: control
+  OvercloudComputeFlavor: compute
+  OvercloudComputeLeaf1Flavor: compute-leaf1
+  OvercloudComputeLeaf2Flavor: compute-leaf2
+  ComputeLeaf1Count: 0
+  ComputeLeaf2Count: 1
+

@@ -1,0 +1,46 @@
+apiVersion: v1
+basedomain: hexo.lab
+metadata:
+  name: "{{project_name}}"
+networking:
+  machineCIDR: 10.20.0.0/24
+  networkType: OVNKubernetes
+compute:
+- name: worker
+  replicas: 3
+controlPlane:
+  name: master
+  replicas: 3
+  platform:
+    baremetal: {}
+platform:
+  baremetal:
+    apiVIP: 10.20.0.200
+    ingressVIP: 10.20.0.201
+    provisioningNetworkCIDR: 10.10.0.0/24
+    provisioningNetworkInterface: ens3
+    hosts:
+{% for servers in kni_instances.openstack_servers %}
+      - name: "{{servers.name}}"
+{% if 'provisioning0' in servers.addresses %}
+        bootMACAddress: "{{servers.addresses.provisioning0.0['OS-EXT-IPS-MAC:mac_addr']}}"
+{% if 'master' in servers.name %}
+        role: master
+        rootDeviceHints:
+          deviceName: "/dev/vda"
+        hardwareProfile: default
+{% endif %}
+{% if 'worker' in servers.name %}
+        role: worker
+        rootDeviceHints:
+          deviceName: "/dev/vda"
+        hardwareProfile: unknown
+{% endif %}
+{% endif %}
+        bmc:
+          address: "ipmi://X.X.X.X"
+          username: "{{project_name}}"
+          password: "{{project_password}}"
+{% endfor %}
+pullSecret: '<pull_secret>'
+sshKey: '<ssh_pub_key>'

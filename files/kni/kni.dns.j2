@@ -1,0 +1,39 @@
+domain-needed
+bind-dynamic
+bogus-priv
+domain={{ project_name }}.hexo.lab
+dhcp-range=10.20.0.100,10.20.0.149
+dhcp-option=3,10.20.0.1
+resolv-file=/etc/resolv.conf.upstream
+interface=baremetal
+server=10.20.0.10
+
+
+#Wildcard for apps -- make changes to cluster-name (openshift) and domain (example.com)
+address=/.apps.{{ project_name }}.hexo.lab/10.20.0.201
+
+#Static IPs for Masters
+#dhcp-host=<NIC2-mac-address>,provisioner.openshift.example.com,<ip-of-provisioner>
+{% for servers in kni_instances.openstack_servers %}
+{% if 'baremetal0' in servers.addresses %}
+{% if 'master1' in servers.name %}
+dhcp-host={{servers.addresses.baremetal0.0['OS-EXT-IPS-MAC:mac_addr']}},{{servers.name}}.{{ project_name }}.hexo.lab,10.20.0.21
+{% endif %}
+{% if 'master2' in servers.name %}
+dhcp-host={{servers.addresses.baremetal0.0['OS-EXT-IPS-MAC:mac_addr']}},{{servers.name}}.{{ project_name }}.hexo.lab,10.20.0.22
+{% endif %}
+{% if 'master3' in servers.name %}
+dhcp-host={{servers.addresses.baremetal0.0['OS-EXT-IPS-MAC:mac_addr']}},{{servers.name}}.{{ project_name }}.hexo.lab,10.20.0.23
+{% endif %}
+{% if 'worker1' in servers.name %}
+dhcp-host={{servers.addresses.baremetal0.0['OS-EXT-IPS-MAC:mac_addr']}},{{servers.name}}.{{ project_name }}.hexo.lab,10.20.0.31
+{% endif %}
+{% if 'worker2' in servers.name %}
+dhcp-host={{servers.addresses.baremetal0.0['OS-EXT-IPS-MAC:mac_addr']}},{{servers.name}}.{{ project_name }}.hexo.lab,10.20.0.32
+{% endif %}
+{% if 'worker3' in servers.name %}
+dhcp-host={{servers.addresses.baremetal0.0['OS-EXT-IPS-MAC:mac_addr']}},{{servers.name}}.{{ project_name }}.hexo.lab,10.20.0.33
+{% endif %}
+{% endif %}
+{% endfor %}
+

@@ -1,0 +1,5 @@
+parameter_defaults:
+  IronicDefaultDeployInterface: direct
+  SkipRhelEnforcement: true
+  #AdminPassword: "Passw0rd"
+

@@ -1,0 +1,19 @@
+#!/bin/bash
+#############################
+# This is not fully dynamic file and it might have not been populated with all right information. This is a template. You might still want to verify this is what you want before executing it
+##############################
+
+source ~/stackrc
+cd ~/
+time openstack overcloud deploy --templates --stack {{ project_name }} \
+     --ntp-server 10.10.0.10 \
+     -e templates/network-environment.yaml \
+     -e templates/node-info.yaml \
+     -e templates/overcloud_images.yaml \
+     -e templates/host-memory.yaml \
+     -e /usr/share/openstack-tripleo-heat-templates/environments/network-isolation.yaml 
+
+     #if ceph has been configured you might consider adding following pre-defined extension (again verify it's what you want):
+     #-e /usr/share/openstack-tripleo-heat-templates/environments/ceph-ansible/ceph-ansible.yaml \
+     #-e templates/ceph-custom-config.yaml \
+

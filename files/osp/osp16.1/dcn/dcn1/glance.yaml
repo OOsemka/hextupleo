@@ -1,0 +1,11 @@
+parameter_defaults:
+  GlanceEnabledImportMethods: web-download,copy-image
+  GlanceBackend: rbd
+  GlanceStoreDescription: 'dcn1 rbd glance store'
+  GlanceBackendID: dcn1
+  GlanceMultistoreConfig:
+    central:
+      GlanceBackend: rbd
+      GlanceStoreDescription: 'central rbd glance store'
+      CephClientUserName: 'openstack'
+      CephClusterName: central

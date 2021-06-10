@@ -1,0 +1,306 @@
+---
+  - name: create user stack and set his permissions
+    user: 
+      name: stack
+    become: yes
+  - shell: echo "{{ project_password }}" | passwd stack --stdin
+    become: yes
+  - shell: echo "stack ALL=(root) NOPASSWD:ALL" | tee -a /etc/sudoers.d/stack
+    become: yes
+
+  - file:
+      path: /etc/sudoers.d/stack
+      mode: 0440
+
+  
+  - name: set up IP for new external and provider
+    shell: |
+       ifup eth2
+       ip a a 10.1.0.11/24 dev eth2
+       ifup eth3
+       ip a a 10.60.0.1/24 dev eth3
+    become: yes
+    ignore_errors: True
+    tags:
+       - customize_undercloud
+
+  - name: copy network file for eth2
+    copy: src=files/osp/ifcfg-eth2 dest=/etc/sysconfig/network-scripts/ 
+
+  - name: copy network file for eth3
+    copy: src=files/osp/ifcfg-eth3 dest=/etc/sysconfig/network-scripts/ 
+
+
+  - lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "PasswordAuthentication no"
+      line: "PasswordAuthentication yes"
+  - service:
+      name: sshd
+      state: restarted
+
+
+
+  - name: Create Stack sub-directories
+    file:
+      path: /home/stack/{{ item }}
+      state: directory
+      mode: 0755
+      owner: stack
+      group: stack
+    with_items:
+       - GoodieBag
+       - GoodieBag/dcn
+       - GoodieBag/dcn/nic-config
+       - GoodieBag/dcn/dcn1
+       - GoodieBag/dcn/dcn2
+       - GoodieBag/ssl
+       - images
+       - templates
+       - templates/nic-config
+
+
+  - name: Generating openstack rc file for your convenience
+    shell: |
+       cat <<EOF > /home/stack/GoodieBag/{{ project_name }}rc
+       for key in \$( set | awk '{FS="="}  /^OS_/ {print \$1}' ); do unset \$key ; done
+       export NOVA_VERSION=1.1
+       export COMPUTE_API_VERSION=1.1
+       export OS_USERNAME={{ project_name }}
+       export OS_PROJECT_NAME={{ project_name }}
+       export OS_USER_DOMAIN_NAME={{ clouds.devstack.auth.domain_name }}
+       export OS_PROJECT_DOMAIN_NAME={{ clouds.devstack.auth.domain_name }}
+       export OS_NO_CACHE=True
+       export OS_CLOUDNAME={{ project_name }}
+       export PYTHONWARNINGS='ignore:Certificate has no, ignore:A true SSLContext object is not available'
+       export OS_AUTH_TYPE=password
+       export OS_PASSWORD={{ project_password }}
+       export OS_AUTH_URL={{ os_auth }}
+       export OS_IDENTITY_API_VERSION=3
+       export OS_COMPUTE_API_VERSION=2.latest
+       export OS_IMAGE_API_VERSION=2
+       export OS_VOLUME_API_VERSION=3
+       export OS_REGION_NAME=regionOne
+       # Add OS_CLOUDNAME to PS1
+       if [ -z "\${CLOUDPROMPT_ENABLED:-}" ]; then
+           export PS1=\${PS1:-""}
+           export PS1=\\\${OS_CLOUDNAME:+"(\\\$OS_CLOUDNAME)"}\\ \$PS1
+           export CLOUDPROMPT_ENABLED=1
+       fi
+       EOF
+    become: yes
+
+
+     
+  - name: create playbook for generating instackenv
+    template:
+      src: files/osp/generate_instackenv.j2
+      dest: "/home/stack/GoodieBag/generate_instackenv.yml"
+      mode: 0744
+      owner: stack
+      group: stack
+  
+
+
+
+  - name: create undercloud.conf
+    template:
+      src: files/osp/{{ osp }}/undercloud-{{ osp }}.j2
+      dest: "/home/stack/undercloud.conf"
+      mode: 0744
+      owner: stack
+      group: stack
+
+
+
+  - name: create deploy.sh
+    template:
+      src: files/osp/{{ osp }}/deploy-{{ osp }}.j2
+      dest: "/home/stack/GoodieBag/deploy.sh"
+      mode: 0744
+      owner: stack
+      group: stack
+
+
+
+  - name: copy Goodies to GoodieBag to stack
+    copy: src=files/osp/{{ item }} dest=/home/stack/GoodieBag/ owner=stack group=stack mode=0744
+    with_items:
+      - post-deploy.sh
+      - quick_deploy_on_hextupleo.sh
+      - instackenv.j2 
+
+
+  - name: copy ssl to GoodieBag/ssl to stack
+    copy: src=files/osp/ssl/{{ item }} dest=/home/stack/GoodieBag/ssl/ owner=stack group=stack mode=0744
+    with_items:
+      - ansible.cfg
+      - enable-tls.yaml.j2
+      - generate_cert.yml
+      - hosts
+      - inject-trust-anchor.yaml.j2
+
+
+  - name: rhel7.4 adds requiretty .. removing that option
+    become: yes
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: 'Defaults    requiretty.*'
+      line: '#Defaults    requiretty'
+
+
+
+  - name: create network-environment.yaml
+    template:
+      src: files/osp/{{ osp }}/network-environment.j2
+      dest: "/home/stack/templates/network-environment.yaml"
+      mode: 0644
+      owner: stack
+      group: stack
+ 
+ 
+  - name: copy other network files
+    copy: src=files/osp/{{ osp }}/{{ item }}.yaml dest="/home/stack/templates/{{ item }}.yaml" owner=stack group=stack mode=0644
+    with_items:
+      - network_data
+    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+
+  - name: copy storage configuration files
+    copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
+    with_items:
+      - storage-environment.yaml
+      - wipe-disk.sh
+      - wipe-disks.yaml
+      - hci-compute.yaml
+
+
+  - name: copy network-templates
+    copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/templates/nic-config/ owner=stack group=stack mode=0644
+    with_items:
+      - controller.yaml
+      - compute.yaml
+      - compute-hci.yaml
+      - ceph-storage.yaml
+
+  - name: copy osp specific templates
+    copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
+    with_items:
+      - ceph-custom-config.yaml
+      - host-memory.yaml
+    when: osp == "osp12" or osp == "osp13" or osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+  - name: create osp specific templates (node-info.yaml)
+    template:
+      src: files/osp/{{ osp }}/node-info.j2
+      dest: "/home/stack/templates/node-info.yaml"
+      mode: 0644
+      owner: stack
+      group: stack
+    when: osp == "osp12" or osp == "osp13" or osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+  - name: copy osp14 specific templates (undercloud_hiera.yaml)
+    copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
+    with_items:
+      - undercloud_hiera.yaml
+      - containers-prepare-parameter.yaml
+    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+  - name: copy osp14 specific files (prepare_container_images.sh)
+    copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/GoodieBag/ owner=stack group=stack mode=0744
+    with_items:
+      - prepare_container_images.sh
+    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+  - name: copy osp16.1 dcn specific configuration
+    copy: src=files/osp/{{ osp }}/dcn/{{ item }} dest=/home/stack/GoodieBag/dcn/{{ item }} owner=stack group=stack mode=0644
+    with_items:
+      - central_roles.yaml
+      - ceph-custom-config.yaml
+      - deploy-central.sh
+      - deploy-dcn1.sh
+      - deploy-dcn2.sh
+      - glance_update.yaml
+      - network-environment.yaml
+      - node-info.yaml
+      - site-name.yaml
+      - spine-leaf-ctlplane.yaml
+      - spine-leaf-vips.yaml
+      - undercloud_custom_env.yaml
+      - network_data_spine_leaf.yaml
+      - dcn1/ceph.yaml
+      - dcn1/dcn1-images-env.yaml
+      - dcn1/dcn1_roles.yaml
+      - dcn1/glance.yaml
+      - dcn1/node-info.yaml
+      - dcn1/site-name.yaml
+      - dcn1/tuning.yaml
+      - dcn2/dcn2_roles.yaml
+      - dcn2/node-info.yaml
+      - dcn2/site-name.yaml
+      - nic-config/compute-hci-leaf1.yaml
+      - nic-config/compute-hci.yaml
+      - nic-config/compute.yaml
+      - nic-config/controller.yaml
+      - nic-config/compute-leaf2.yaml
+      
+
+    when: osp == "osp16.1"
+
+  - name: create undercloud.conf for dcn
+    template:
+      src: files/osp/{{ osp }}/undercloud-dcn-{{ osp }}.j2
+      dest: "/home/stack/GoodieBag/undercloud-dcn.conf"
+      mode: 0744
+      owner: stack
+      group: stack
+
+    
+  - name: Enable and start service ntpd on undercloud to serve overcloud nodes
+    service:
+      name: ntpd
+      enabled: yes
+      state: started
+    when: osp == "osp10" or osp == "osp13" or osp == "osp14"
+
+  - name: Enable and start service chrony on undercloud to serve overcloud nodes
+    service:
+      name: chronyd
+      enabled: yes
+      state: started
+    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+  - name: Destroy the default virt-net
+    shell: |
+       virsh net-destroy default
+       virsh net-autostart --network default --disable
+    become: yes
+    ignore_errors: true
+
+  - name: redoing PasswordAuthentication yes
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: "PasswordAuthentication no"
+      line: "PasswordAuthentication yes"
+    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+  - name:  restarting sshd
+    service:
+      name: sshd
+      state: restarted
+    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+
+
+  - name: display public ip
+    debug:
+      var: ansible_host
+
+
+  - name: ALL DONE
+    debug:
+      msg: "WE ARE ALL DONE .. Happy hacking!"
+
+
+
+

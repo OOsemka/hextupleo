@@ -1,0 +1,49 @@
+---
+- name: Generate configs
+  hosts:
+    - localhost
+  vars:
+    project_name: "{{ project_name }}"
+    project_password: "{{ project_password }}"
+  tasks:
+    - name: Learn kni instances in the project
+      os_server_info:
+        auth:
+          auth_url: "{{ clouds.devstack.auth.auth_url }}"
+          username: "{{ project_name }}"
+          password: "{{ project_password }}"
+          project_name: "{{ project_name }}"
+          domain_id: "{{ clouds.devstack.auth.domain_name }}"
+        validate_certs: False
+        server: kni*
+      register: kni_instances
+      tags:
+        - instances
+
+    - name: Show kni  instances
+{% raw %}
+
+      debug:
+         msg: "{{ kni_instances.openstack_servers }}"
+      tags:
+       - instances
+{% endraw %}
+
+    - name: create install-config.yaml
+      template:
+        src: "install-config.j2"
+        dest: "install-config.yaml"
+        mode: 0644
+
+    - name: create dhcp config
+      template:
+        src: "kni.dns.j2"
+        dest: "kni.dns"
+        mode: 0644
+
+    - name: create hosts config
+      template:
+        src: "hosts.j2"
+        dest: "hosts"
+        mode: 0644
+

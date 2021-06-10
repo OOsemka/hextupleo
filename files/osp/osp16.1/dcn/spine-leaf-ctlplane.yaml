@@ -1,0 +1,5 @@
+parameter_defaults:
+  ControllerControlPlaneSubnet: leaf0
+  ComputeControlPlaneSubnet: leaf0
+  ComputeLeaf1ControlPlaneSubnet: leaf1
+  ComputeLeaf2ControlPlaneSubnet: leaf2

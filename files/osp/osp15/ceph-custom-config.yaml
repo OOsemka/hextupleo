@@ -1,0 +1,16 @@
+parameter_defaults:
+  EnableRhcs4Beta: True
+  CephConfigOverrides:
+    journal_size: 5120
+    max_open_files: 131072
+    osd_pool_default_size: 1
+    osd_pool_default_min_size: 1
+    osd_pool_default_pg_num: 16
+    osd_pool_default_pgp_num: 16
+  CephAnsibleDisksConfig:
+    devices:
+      - /dev/vdb
+    osd_scenario: lvm
+    osd_objectstore: bluestore
+  CephPoolDefaultPgNum: 16
+

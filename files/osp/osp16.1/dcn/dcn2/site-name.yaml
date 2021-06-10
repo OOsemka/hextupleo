@@ -1,0 +1,9 @@
+parameter_defaults:
+    NovaComputeAvailabilityZone: dcn2
+    NovaCrossAZAttach: false
+    RootStackName: dcn2
+    ManageNetworks: false
+
+    ComputeLeaf2ExtraConfig:
+      neutron::agents::dhcp::availability_zone: 'dcn2'
+

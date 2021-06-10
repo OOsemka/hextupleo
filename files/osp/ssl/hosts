@@ -1,0 +1,5 @@
+localhost ansible_connection=local
+[ospd_hosts]
+10.9.65.115
+[ospd_hosts:vars]
+ansible_ssh_user = stack
