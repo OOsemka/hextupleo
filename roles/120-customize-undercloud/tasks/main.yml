@@ -75,7 +75,7 @@
        export PYTHONWARNINGS='ignore:Certificate has no, ignore:A true SSLContext object is not available'
        export OS_AUTH_TYPE=password
        export OS_PASSWORD={{ project_password }}
-       export OS_AUTH_URL={{ os_auth }}
+       export OS_AUTH_URL={{ clouds.devstack.auth.auth_url }}
        export OS_IDENTITY_API_VERSION=3
        export OS_COMPUTE_API_VERSION=2.latest
        export OS_IMAGE_API_VERSION=2
