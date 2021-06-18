@@ -1,0 +1,37 @@
+---
+- name: Create Templates and Surveys in Tower for the Hextupleo project
+  hosts:
+    - localhost
+  vars:       
+      name: "Tower Hextupleo - Create Project"
+      job_type: "run"
+      inventory: "Demo Inventory"
+      project: "hextupleo-local"
+      playbook: "create-os-project.yml"
+      #credential: "ansible"
+      credential: "hextupleo - Overcloud"
+      state: "present"
+      tower_host: 10.9.71.14
+      tower_username: admin
+      tower_password: Redhat01
+
+  tasks:
+
+  - name: Create os_project tower job template
+    tower_job_template:
+      name: "{{ name }}"
+      job_type: "{{ job_type }}"
+      inventory: "{{ inventory }}"
+      project: "{{ project }}"
+      playbook: "{{ playbook }}"
+      credential: "Demo Credential"
+      state: "{{ state }}"
+      tower_host: "{{ tower_host }}"
+      tower_username: "{{ tower_username }}"
+      tower_password: "{{ tower_password }}"
+      survey_enabled: yes
+      validate_certs: no
+      survey_spec: "{{ lookup('file', 'files/tower/survey_os_project.json') }}"
+
+  - name: Change Credentials to openstack
+    command: tower-cli job_template associate_credential --job-template "{{ name }}" --credential "{{ credential }}" -h "{{ tower_host }}" -u "{{ tower_username }}" -p "{{ tower_password }}"

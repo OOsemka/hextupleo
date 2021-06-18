@@ -1,0 +1,28 @@
+{
+  "name": "", 
+  "description": "", 
+  "spec": [
+    {
+      "question_name": "Project Name", 
+      "question_description": "", 
+      "required": true, 
+      "type": "text", 
+      "variable": "project_name", 
+      "min": 0, 
+      "max": 1024, 
+      "default": "project1", 
+      "choices": ""
+    }, 
+    {
+      "question_name": "Password", 
+      "question_description": "Default is 'Passw0rd'", 
+      "required": true, 
+      "type": "password", 
+      "variable": "project_password", 
+      "min": 0, 
+      "max": 32, 
+      "default": "Passw0rd", 
+      "choices": ""
+    }
+  ]
+}
