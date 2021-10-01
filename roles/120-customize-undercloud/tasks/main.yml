@@ -164,7 +164,7 @@
     copy: src=files/osp/{{ osp }}/{{ item }}.yaml dest="/home/stack/templates/{{ item }}.yaml" owner=stack group=stack mode=0644
     with_items:
       - network_data
-    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
 
   - name: copy storage configuration files
@@ -189,7 +189,7 @@
     with_items:
       - ceph-custom-config.yaml
       - host-memory.yaml
-    when: osp == "osp12" or osp == "osp13" or osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp12" or osp == "osp13" or osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
   - name: create osp specific templates (node-info.yaml)
     template:
@@ -198,20 +198,20 @@
       mode: 0644
       owner: stack
       group: stack
-    when: osp == "osp12" or osp == "osp13" or osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp12" or osp == "osp13" or osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
   - name: copy osp14 specific templates (undercloud_hiera.yaml)
     copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/templates/ owner=stack group=stack mode=0644
     with_items:
       - undercloud_hiera.yaml
       - containers-prepare-parameter.yaml
-    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
   - name: copy osp14 specific files (prepare_container_images.sh)
     copy: src=files/osp/{{ osp }}/{{ item }} dest=/home/stack/GoodieBag/ owner=stack group=stack mode=0744
     with_items:
       - prepare_container_images.sh
-    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp14" or osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
   - name: copy osp16.1 dcn specific configuration
     copy: src=files/osp/{{ osp }}/dcn/{{ item }} dest=/home/stack/GoodieBag/dcn/{{ item }} owner=stack group=stack mode=0644
@@ -246,7 +246,7 @@
       - nic-config/compute-leaf2.yaml
       
 
-    when: osp == "osp16.1"
+    when: osp == "osp16.1" or osp == "osp16.2"
 
   - name: create undercloud.conf for dcn
     template:
@@ -269,7 +269,7 @@
       name: chronyd
       enabled: yes
       state: started
-    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
   - name: Destroy the default virt-net
     shell: |
@@ -283,13 +283,13 @@
       path: /etc/ssh/sshd_config
       regexp: "PasswordAuthentication no"
       line: "PasswordAuthentication yes"
-    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
   - name:  restarting sshd
     service:
       name: sshd
       state: restarted
-    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1"
+    when: osp == "osp15" or osp == "osp16" or osp == "osp16.1" or osp == "osp16.2"
 
 
   - name: display public ip

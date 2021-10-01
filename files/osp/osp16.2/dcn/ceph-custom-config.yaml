@@ -1,0 +1,18 @@
+parameter_defaults:
+  CephAnsibleDisksConfig:
+    devices:
+      - /dev/vdb
+    osd_scenario: lvm
+    osd_objectstore: bluestore
+  CephPoolDefaultPgNum: 16
+  CephPoolDefaultSize: 1
+  CephClusterName: central
+  CephAnsibleExtraConfig:
+    public_network: '10.40.0.0/24,10.40.1.0/24'
+    cluster_network: '10.50.0.0/24,10.50.1.0/24'
+
+  GlanceEnabledImportMethods: web-download,copy-image
+  GlanceBackend: rbd
+  GlanceStoreDescription: 'central rbd glance store'
+  GlanceBackendID: central
+  CephClusterName: central

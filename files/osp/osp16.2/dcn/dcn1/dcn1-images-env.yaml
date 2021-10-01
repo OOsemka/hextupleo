@@ -1,0 +1,42 @@
+# Generated with the following on 2021-01-26T16:05:51.313494
+#
+#   openstack tripleo container image prepare --environment-directory /home/stack/templates/test -r /home/stack/templates/dcn1/dcn1_roles.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/ceph-ansible/ceph-ansible.yaml -e /usr/share/openstack-tripleo-heat-templates/environments/services/neutron-ovs.yaml -e /home/stack/dcn-common/central-export.yaml -e /home/stack/templates/containers-prepare-parameter.yaml --output-env-file /home/stack/templates/dcn1/dcn1-images-env.yaml --debug
+#
+
+parameter_defaults:
+  ContainerCeilometerCentralImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-ceilometer-central:16.1
+  ContainerCeilometerComputeImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-ceilometer-compute:16.1
+  ContainerCeilometerConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-ceilometer-central:16.1
+  ContainerCephDaemonImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhceph/rhceph-4-rhel8:latest
+  ContainerCinderApiImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-cinder-api:16.1
+  ContainerCinderConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-cinder-api:16.1
+  ContainerCinderVolumeImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-cinder-volume:16.1
+  ContainerCollectdConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-collectd:16.1
+  ContainerCollectdImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-collectd:16.1
+  ContainerCrondConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-cron:16.1
+  ContainerCrondImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-cron:16.1
+  ContainerEtcdConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-etcd:16.1
+  ContainerEtcdImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-etcd:16.1
+  ContainerGlanceApiConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-glance-api:16.1
+  ContainerGlanceApiImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-glance-api:16.1
+  ContainerIscsidConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-iscsid:16.1
+  ContainerIscsidImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-iscsid:16.1
+  ContainerMetricsQdrConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-qdrouterd:16.1
+  ContainerMetricsQdrImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-qdrouterd:16.1
+  ContainerMultipathdConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-multipathd:16.1
+  ContainerMultipathdImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-multipathd:16.1
+  ContainerNeutronApiImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-neutron-server:16.1
+  ContainerNeutronConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-neutron-server:16.1
+  ContainerNovaComputeImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-nova-compute:16.1
+  ContainerNovaLibvirtConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-nova-compute:16.1
+  ContainerNovaLibvirtImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-nova-libvirt:16.1
+  ContainerOctaviaRsyslogImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-rsyslog:16.1
+  ContainerOpenvswitchImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-neutron-openvswitch-agent:16.1
+  ContainerQdrouterdConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-qdrouterd:16.1
+  ContainerQdrouterdImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-qdrouterd:16.1
+  ContainerRsyslogConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-rsyslog:16.1
+  ContainerRsyslogImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-rsyslog:16.1
+  ContainerRsyslogSidecarConfigImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-rsyslog:16.1
+  ContainerRsyslogSidecarImage: chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787/rhosp-rhel8/openstack-rsyslog:16.1
+  DockerInsecureRegistryAddress:
+  - chrisj-dcn-undercloud.ctlplane.hextupleo.lab:8787

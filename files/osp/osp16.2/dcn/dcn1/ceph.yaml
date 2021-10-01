@@ -1,0 +1,9 @@
+parameter_defaults:
+  CephAnsibleDisksConfig:
+    devices:
+      - /dev/vdb
+    osd_scenario: lvm
+    osd_objectstore: bluestore
+  CephPoolDefaultPgNum: 16
+  CephPoolDefaultSize: 1
+  CephClusterName: dcn1

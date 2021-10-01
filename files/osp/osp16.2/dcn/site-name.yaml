@@ -1,0 +1,7 @@
+parameter_defaults:
+    NovaComputeAvailabilityZone: central
+    ControllerExtraConfig:
+        nova::availability_zone::default_schedule_zone: central
+    NovaCrossAZAttach: false
+    CinderStorageAvailabilityZone: central
+    GlanceBackendID: central

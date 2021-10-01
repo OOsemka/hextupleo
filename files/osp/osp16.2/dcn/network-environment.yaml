@@ -1,0 +1,40 @@
+#This file is an example of an environment file for defining the isolated
+#networks and related parameters.
+resource_registry:
+  # Network Interface templates to use (these files must exist)
+  #OS::TripleO::Compute::Net::SoftwareConfig:
+  #  ./nic-config/compute.yaml
+  # if you are configuring HCI (Hyperconverged nodes) comment 2 lines above and uncomment 2 lines below
+  OS::TripleO::Compute::Net::SoftwareConfig:
+    ./nic-config/compute-hci.yaml
+  OS::TripleO::ComputeLeaf1::Net::SoftwareConfig:
+    ./nic-config/compute-hci-leaf1.yaml
+  OS::TripleO::ComputeLeaf2::Net::SoftwareConfig:
+    ./nic-config/compute-leaf2.yaml
+  OS::TripleO::Controller::Net::SoftwareConfig:
+    ./nic-config/controller.yaml
+  OS::TripleO::CephStorage::Net::SoftwareConfig:
+    ./nic-config/ceph-storage.yaml
+
+
+parameter_defaults:
+  DnsServers: ["10.9.71.7","8.8.8.8"]
+  NeutronFlatNetworks: 'datacentre,provider0,provider1,provider2'
+  ControllerParameters:
+    NeutronBridgeMappings: "datacentre:br-ex,provider0:br-provider"
+  ComputeParameters:
+    NeutronBridgeMappings: "provider0:br-provider"
+  ComputeLeaf1Parameters:
+    NeutronBridgeMappings: "provider1:br-provider1"
+  ComputeLeaf2Parameters:
+    NeutronBridgeMappings: "provider2:br-provider2"
+  BondInterfaceOvsOptions: "bond_mode=active-backup"
+  TimeZone: 'US/Eastern'
+  NtpServer: 10.10.0.10
+  NeutronEnableIsolatedMetadata: true
+
+
+
+
+
+
