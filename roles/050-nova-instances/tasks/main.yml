@@ -32,6 +32,8 @@
      action: stop
      server: "{{ item.name }}"
      validate_certs: False
+  async: 45
+  poll: 0
   with_items:
     - "{{ instances }}"
   when: item.image == "pxeboot"

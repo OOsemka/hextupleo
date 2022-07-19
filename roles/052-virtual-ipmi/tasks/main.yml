@@ -1,5 +1,4 @@
 ---
-#this needs work
 - name: deploy virtual ipmi instances
   os_server:
      auth: "{{ os_auth_tenant }}"
@@ -14,48 +13,25 @@
        - net-name: virtualipmi
      userdata: |
        {%- raw -%}#!/bin/bash
-       cat <<EOF > /usr/lib/python2.7/site-packages/pyghmi/cmd/fakebmc.py
-       # Copyright 2015 Lenovo
-       #
-       # Licensed under the Apache License, Version 2.0 (the "License");
-       # you may not use this file except in compliance with the License.
-       # You may obtain a copy of the License at
-       #
-       #     http://www.apache.org/licenses/LICENSE-2.0
-       #
-       # Unless required by applicable law or agreed to in writing, software
-       # distributed under the License is distributed on an "AS IS" BASIS,
-       # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-       # See the License for the specific language governing permissions and
-       # limitations under the License.
-       
-       """this is a quick sample of how to write something that acts like a bmc
-       to play:
-       run fakebmc
-       # ipmitool -I lanplus -U admin -P password -H 127.0.0.1 power status
-       Chassis Power is off
-       # ipmitool -I lanplus -U admin -P password -H 127.0.0.1 power on
-       Chassis Power Control: Up/On
-       # ipmitool -I lanplus -U admin -P password -H 127.0.0.1 power status
-       Chassis Power is on
-       # ipmitool -I lanplus -U admin -P password -H 127.0.0.1 mc reset cold
-       Sent cold reset command to MC
-       (fakebmc exits)
-       """
-       
+
+       # Creating Python program for fake Openstack BMC
+       cat <<EOF > /usr/lib/python2.7/site-packages/pyghmi/cmd/ospbmc.py
        import argparse
        import sys
-       import subprocess
-       import os
+       import openstack
        
        import pyghmi.ipmi.bmc as bmc
        
-       
-       class FakeBmc(bmc.Bmc):
+       class OpenStackBmc(bmc.Bmc):
            def __init__(self, authdata, port):
-               super(FakeBmc, self).__init__(authdata, port)
+               super(OpenStackBmc, self).__init__(authdata, port)
                self.powerstate = 'off'
                self.bootdevice = 'default'
+               self.conn = osp_connect(cloud_name = "{% endraw -%}{{ project_name }}{%- raw -%}")
+               self.server_name = "{% endraw -%}{{ item.name }}{%- raw -%}"
+               self.server_instance = get_server(self.server_name)
+               self.image_name = "pxeboot"
+               self.image = get_image(self.image_name)
        
            def get_boot_device(self):
                return self.bootdevice
@@ -65,7 +41,7 @@
                print bootdevice
                if "network" in bootdevice:
                   print "pxe boot selected"
-                  os.system('openstack --os-auth-url "{% endraw -%}{{ clouds.devstack.auth.auth_url }}{%- raw -%}" --os-project-name "{% endraw -%}{{ project_name }}{%- raw -%}" --os-project-domain-id  "{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}" --os-identity-api-version "3" --os-username "{% endraw -%}{{ project_name }}{%- raw -%}" --os-password "{% endraw -%}{{ project_password }}{%- raw -%}" --insecure server rebuild --image pxeboot "{% endraw -%}{{ item.name }}{%- raw -%}" ')
+                  self.conn.compute.rebuild_server(self.server_instance.id, self.server_name, self.server_name, image=self.image)
                else:
                   self.bootdevice = bootdevice
        
@@ -75,9 +51,8 @@
                sys.exit(0)
        
            def get_power_state(self):
-               output_test = subprocess.check_output('openstack --os-auth-url "{% endraw -%}{{ clouds.devstack.auth.auth_url }}{%- raw -%}" --os-project-name "{% endraw -%}{{ project_name }}{%- raw -%}" --os-project-domain-id  "{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}" --os-identity-api-version "3" --os-username "{% endraw -%}{{ project_name }}{%- raw -%}" --os-password "{% endraw -%}{{ project_password }}{%- raw -%}" --insecure server show "{% endraw -%}{{ item.name }}{%- raw -%}" | grep power_state', shell=True)
-               #print output_test
-               if "Running" in output_test:
+               self.server_instance = get_server(self.server_name)
+               if "ACTIVE" in self.server_instance.status:
                   print "Power status is on"
                   self.powerstate = 'on'
                else:
@@ -86,18 +61,20 @@
                return self.powerstate
        
            def power_off(self):
-               output_test = subprocess.check_output('openstack --os-auth-url "{% endraw -%}{{ clouds.devstack.auth.auth_url }}{%- raw -%}" --os-project-name "{% endraw -%}{{ project_name }}{%- raw -%}" --os-project-domain-id  "{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}" --os-identity-api-version "3" --os-username "{% endraw -%}{{ project_name }}{%- raw -%}" --os-password "{% endraw -%}{{ project_password }}{%- raw -%}" --insecure server show "{% endraw -%}{{ item.name }}{%- raw -%}" | grep power_state', shell=True)
-               if "Running" in output_test:
+               self.server_instance = get_server(self.server_name)
+               if "ACTIVE" in self.server_instance.status:
                   print "System is in Running state"
                   # this should be power down without waiting for clean shutdown
-                  os.system('openstack --os-auth-url  "{% endraw -%}{{ clouds.devstack.auth.auth_url }}{%- raw -%}"  --os-project-name  "{% endraw -%}{{ project_name }}{%- raw -%}"  --os-project-domain-id  "{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}"  --os-identity-api-version "3" --os-username  "{% endraw -%}{{ project_name }}{%- raw -%}"  --os-password  "{% endraw -%}{{ project_password }}{%- raw -%}"  --insecure server stop  "{% endraw -%}{{ item.name }}{%- raw -%}"')
+                  self.conn.compute.stop_server(self.server_instance.id)
                   self.powerstate = 'off'
                   print('abruptly remove power')
                else:
                   self.powerstate = 'off'
                   print('abruptly remove power')
+       
            def power_on(self):
-               os.system('openstack --os-auth-url "{% endraw -%}{{ clouds.devstack.auth.auth_url }}{%- raw -%}" --os-project-name "{% endraw -%}{{ project_name }}{%- raw -%}" --os-project-domain-id  "{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}" --os-identity-api-version "3" --os-username "{% endraw -%}{{ project_name }}{%- raw -%}" --os-password "{% endraw -%}{{ project_password }}{%- raw -%}"  --insecure server start "{% endraw -%}{{ item.name }}{%- raw -%}"')
+               self.conn.compute.start_server(self.server_instance.id)
+       
                self.powerstate = 'on'
                print('powered on')
        
@@ -108,7 +85,7 @@
                # should attempt a clean shutdown
                print('politely shut down the system')
                self.powerstate = 'off'
-
+       
            def is_active(self):
                return self.powerstate == 'on'
        
@@ -117,6 +94,22 @@
                if self.sol:
                    self.sol.send_data(data)
        
+       def get_server(server_name):
+           cloud_name = "{% endraw -%}{{ project_name }}{%- raw -%}"
+           conn = openstack.connect(cloud=cloud_name)
+           server_instance = conn.compute.find_server(server_name, True)
+           return conn.compute.get_server(server_instance.id)
+       
+       def get_image(image_name):
+           cloud_name = "{% endraw -%}{{ project_name }}{%- raw -%}"
+           conn = openstack.connect(cloud=cloud_name)
+           image = conn.compute.find_image(image_name)
+           return image.id
+       
+       
+       def osp_connect(cloud_name):
+           conn = openstack.connect(cloud=cloud_name)
+           return conn
        
        def main():
            parser = argparse.ArgumentParser(
@@ -129,28 +122,70 @@
                                default=623,
                                help='Port to listen on; defaults to 623')
            args = parser.parse_args()
-           mybmc = FakeBmc({'{% endraw -%}{{ project_name }}{%- raw -%}': '{% endraw -%}{{ project_password }}{%- raw -%}'}, port=args.port)
+           print("starting")
+           mybmc = OpenStackBmc({'{% endraw -%}{{ project_name }}{%- raw -%}': '{% endraw -%}{{ project_password }}{%- raw -%}'}, port=args.port)
            mybmc.listen()
        
        
        if __name__ == '__main__':
            sys.exit(main())
        EOF
-       cat <<EOF > /usr/lib/systemd/system/fakebmc.service
+
+
+       #Creating Openstack Credentials cloud file
+       mkdir -p /root/.config/openstack/
+       cat <<EOF > /root/.config/openstack/clouds.yaml
+       clouds:
+         {% endraw -%}{{ project_name }}{%- raw -%}:
+           auth:
+             auth_url: '{% endraw -%}{{ clouds.devstack.auth.auth_url }}{%- raw -%}'
+             password: '{% endraw -%}{{ project_password }}{%- raw -%}'
+             project_domain_name: '{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}'
+             project_name: '{% endraw -%}{{ project_name }}{%- raw -%}'
+             user_domain_name: '{% endraw -%}{{ clouds.devstack.auth.domain_name }}{%- raw -%}'
+             username: '{% endraw -%}{{ project_name }}{%- raw -%}'
+           cacert: '/root/cloud-cert.crt.pem'
+           identity_api_version: '3'
+           region_name: regionOne
+       EOF
+       cat <<EOF > /root/cloud-cert.crt.pem
+       #Cert for the OpenStack
+
+       {% endraw -%}{{ cloud_cert }}{%- raw %}
+        
+       #End of Cert 
+       EOF
+       
+       # Creating service for openstack bmc
+       cat <<EOF > /usr/lib/systemd/system/ospbmc.service
        [Unit]
-       Description=FakeBMC startup
+       Description=OpenStackBMC startup
        
        [Service]
        Type=simple
-       ExecStart=/usr/bin/fakebmc
+       ExecStart=/usr/bin/ospbmc
        
        [Install]
        WantedBy=multi-user.target
        EOF
-       sudo chown root:root /usr/lib/systemd/system/fakebmc.service
-       sudo chmod 644 /usr/lib/systemd/system/fakebmc.service
-       sudo systemctl enable fakebmc
-       sudo systemctl start fakebmc
+
+       cat <<EOF > /usr/bin/ospbmc
+       #!/bin/python
+       
+       import sys
+       
+       from pyghmi.cmd.ospbmc import main
+       
+       
+       if __name__ == "__main__":
+           sys.exit(main())
+       EOF
+       
+       sudo chmod 755 /usr/bin/ospbmc
+       sudo chown root:root /usr/lib/systemd/system/ospbmc.service
+       sudo chmod 644 /usr/lib/systemd/system/ospbmc.service
+       sudo systemctl enable ospbmc
+       sudo systemctl start ospbmc
        {% endraw -%}
   with_items: 
     - "{{ instances }}"
