@@ -33,5 +33,7 @@
       validate_certs: False
    with_items:
      - "{{ instances }}"
+   ignore_errors: True
+
    when: item.extra_volume_size != "0"
 
